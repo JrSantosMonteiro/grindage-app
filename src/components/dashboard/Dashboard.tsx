@@ -371,7 +371,6 @@ export function Dashboard({
                 <Sparkles className="w-3.5 h-3.5 text-amber-600" />
                 {t('dash.wordOfDay', appLang)}
               </span>
-              <span className="text-xs font-semibold text-[#7E7C89]">{studyLangInfo.flag} {studyLangInfo.nativeName}</span>
             </div>
 
             <div className="mt-3">
