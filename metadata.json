@@ -1,0 +1,8 @@
+{
+  "name": "Grindage",
+  "description": "Plataforma focada no aprendizado e expansão de vocabulário, gírias e expressões idiomáticas através de minigames e desafios interativos.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
