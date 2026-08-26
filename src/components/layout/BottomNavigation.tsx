@@ -1,19 +1,21 @@
 import { Home, BookOpen, Gamepad2, Bookmark, Trophy, User } from 'lucide-react';
-import { NavigationTab } from '../../types';
+import { AppLanguage, NavigationTab } from '../../types';
+import { t } from '../../i18n/translations';
 
 interface BottomNavigationProps {
   currentTab: NavigationTab;
   onSelectTab: (tab: NavigationTab) => void;
+  appLang?: AppLanguage;
 }
 
-export function BottomNavigation({ currentTab, onSelectTab }: BottomNavigationProps) {
-  const navItems: { tab: NavigationTab; label: string; icon: typeof Home }[] = [
-    { tab: 'dashboard', label: 'Início', icon: Home },
-    { tab: 'learn', label: 'Aprender', icon: BookOpen },
-    { tab: 'games', label: 'Jogos', icon: Gamepad2 },
-    { tab: 'vocabulary', label: 'Vocabulário', icon: Bookmark },
-    { tab: 'achievements', label: 'Conquistas', icon: Trophy },
-    { tab: 'profile', label: 'Perfil', icon: User },
+export function BottomNavigation({ currentTab, onSelectTab, appLang = 'pt' }: BottomNavigationProps) {
+  const navItems: { tab: NavigationTab; key: string; icon: typeof Home }[] = [
+    { tab: 'dashboard', key: 'nav.dashboard', icon: Home },
+    { tab: 'learn', key: 'nav.learn', icon: BookOpen },
+    { tab: 'games', key: 'nav.games', icon: Gamepad2 },
+    { tab: 'vocabulary', key: 'nav.vocabulary', icon: Bookmark },
+    { tab: 'achievements', key: 'nav.achievements', icon: Trophy },
+    { tab: 'profile', key: 'nav.profile', icon: User },
   ];
 
   return (
@@ -45,7 +47,7 @@ export function BottomNavigation({ currentTab, onSelectTab }: BottomNavigationPr
                 isActive ? 'font-bold text-[#8B5CF6]' : 'font-medium'
               }`}
             >
-              {item.label}
+              {t(item.key, appLang)}
             </span>
           </button>
         );

@@ -1,19 +1,32 @@
 import { Flame, X, Check, Calendar, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UserProfile } from '../../types';
+import { AppLanguage, UserProfile } from '../../types';
+import { t } from '../../i18n/translations';
 
 interface StreakModalProps {
   isOpen: boolean;
   onClose: () => void;
   profile: UserProfile;
+  appLang?: AppLanguage;
 }
 
-export function StreakModal({ isOpen, onClose, profile }: StreakModalProps) {
+export function StreakModal({ isOpen, onClose, profile, appLang = 'pt' }: StreakModalProps) {
   if (!isOpen) return null;
 
-  // Day names for the last 7 days
   const today = new Date();
-  const dayNames = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const dayNamesPt = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const dayNamesEn = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const dayNamesEs = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  const dayNamesFr = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
+
+  const dayNames =
+    appLang === 'en'
+      ? dayNamesEn
+      : appLang === 'es'
+      ? dayNamesEs
+      : appLang === 'fr'
+      ? dayNamesFr
+      : dayNamesPt;
   
   const last7Days = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date(today);
@@ -55,27 +68,27 @@ export function StreakModal({ isOpen, onClose, profile }: StreakModalProps) {
               <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-orange-400 to-amber-400 flex items-center justify-center shadow-lg shadow-orange-500/20">
                 <Flame className="w-11 h-11 text-white fill-current animate-pulse" />
               </div>
-              <span className="absolute -bottom-1 -right-1 bg-[#8B5CF6] text-white font-bold text-xs px-2.5 py-0.5 rounded-full shadow-sm">
+              <span className="absolute -bottom-1 -right-1 bg-[#7C3AED] text-white font-bold text-xs px-2.5 py-0.5 rounded-full shadow-xs">
                 x{profile.streakDays}
               </span>
             </div>
 
             <h3 className="text-2xl font-bold text-[#1F1F23] font-display">
-              {profile.streakDays} Dias de Sequência!
+              {profile.streakDays} {t('streak.daysStreak', appLang)}
             </h3>
             <p className="text-sm text-[#7E7C89] mt-1 max-w-xs">
-              Estude todos os dias para memorizar novas palavras com mais facilidade e manter sua chama acesa.
+              {t('streak.subtitle', appLang)}
             </p>
 
             {/* 7-Day Visual Calendar */}
             <div className="w-full mt-6 p-4 bg-[#F8F7FA] rounded-2xl border border-[#ECEBF1]">
               <div className="flex items-center justify-between mb-3 text-xs font-bold text-[#1F1F23]">
                 <span className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5 text-[#8B5CF6]" />
-                  Últimos 7 dias
+                  <Calendar className="w-3.5 h-3.5 text-[#7C3AED]" />
+                  {t('streak.last7Days', appLang)}
                 </span>
-                <span className="text-[#8B5CF6] font-bold">
-                  {profile.studiedDates.length} dias ativos
+                <span className="text-[#7C3AED] font-bold">
+                  {profile.studiedDates.length} {t('streak.activeDays', appLang)}
                 </span>
               </div>
 
@@ -87,7 +100,7 @@ export function StreakModal({ isOpen, onClose, profile }: StreakModalProps) {
                       item.isStudied
                         ? 'bg-gradient-to-b from-orange-500 to-amber-500 text-white border-orange-400 shadow-xs'
                         : item.isToday
-                        ? 'bg-white text-[#8B5CF6] border-dashed border-[#8B5CF6]'
+                        ? 'bg-white text-[#7C3AED] border-dashed border-[#7C3AED]'
                         : 'bg-white text-[#7E7C89] border-[#ECEBF1]'
                     }`}
                   >
@@ -108,18 +121,18 @@ export function StreakModal({ isOpen, onClose, profile }: StreakModalProps) {
             {/* Streak Motivation Info */}
             <div className="w-full mt-4 flex items-center justify-between p-3.5 bg-[#F8F7FA] rounded-2xl text-xs text-[#7E7C89] border border-[#ECEBF1]">
               <div className="flex items-center gap-2">
-                <Zap className="w-4 h-4 text-[#8B5CF6]" />
-                <span>Melhor sequência histórica:</span>
+                <Zap className="w-4 h-4 text-[#7C3AED]" />
+                <span>{t('streak.bestStreak', appLang)}:</span>
               </div>
-              <span className="font-bold text-[#1F1F23]">{profile.bestStreak} dias</span>
+              <span className="font-bold text-[#1F1F23]">{profile.bestStreak} {t('dash.days', appLang)}</span>
             </div>
 
             <button
               onClick={onClose}
-              className="w-full mt-6 py-3.5 px-6 rounded-2xl bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-bold text-sm shadow-md shadow-purple-200/50 active:scale-[0.98] transition-all cursor-pointer"
+              className="w-full mt-6 py-3.5 px-6 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-md shadow-purple-200/50 active:scale-[0.98] transition-all cursor-pointer"
               id="streak-modal-confirm-btn"
             >
-              Continuar focado
+              {t('streak.keepGoing', appLang)}
             </button>
           </div>
         </motion.div>

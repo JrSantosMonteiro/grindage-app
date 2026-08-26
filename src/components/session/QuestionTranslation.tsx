@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Volume2, CheckCircle, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Question } from '../../types';
+import { Question, StudyLanguage } from '../../types';
 import { audioService } from '../../utils/audio';
 
 interface QuestionTranslationProps {
@@ -10,6 +10,7 @@ interface QuestionTranslationProps {
   isAnswered: boolean;
   isCorrect: boolean;
   onSelectOption: (option: string) => void;
+  studyLang?: StudyLanguage;
 }
 
 export function QuestionTranslation({
@@ -18,12 +19,13 @@ export function QuestionTranslation({
   isAnswered,
   isCorrect,
   onSelectOption,
+  studyLang = 'en',
 }: QuestionTranslationProps) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
-    audioService.speak(question.prompt);
+    audioService.speak(question.prompt, studyLang);
   };
 
   return (

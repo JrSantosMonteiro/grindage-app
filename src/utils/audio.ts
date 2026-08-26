@@ -156,13 +156,21 @@ class AudioController {
     }
   }
 
-  public speak(text: string) {
+  public speak(text: string, lang: 'en' | 'es' | 'fr' | 'pt' | string = 'en') {
     if (typeof window === 'undefined' || !window.speechSynthesis) return;
     try {
       window.speechSynthesis.cancel();
       const cleanText = text.replace(/_+/g, '').trim();
       const utterance = new SpeechSynthesisUtterance(cleanText);
-      utterance.lang = 'en-US';
+
+      const localeMap: Record<string, string> = {
+        en: 'en-US',
+        es: 'es-ES',
+        fr: 'fr-FR',
+        pt: 'pt-BR',
+      };
+
+      utterance.lang = localeMap[lang] || lang || 'en-US';
       utterance.rate = 0.9; // Slightly slower for crisp vocabulary learning
       window.speechSynthesis.speak(utterance);
     } catch {

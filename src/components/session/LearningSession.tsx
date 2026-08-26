@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { X, Sparkles, Zap, ArrowRight, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Question, SessionConfig, SessionResultStats, VocabularyItem } from '../../types';
+import { AppLanguage, Question, SessionConfig, SessionResultStats, VocabularyItem } from '../../types';
 import { generateSessionQuestions } from '../../services/exerciseEngine';
 import { StorageService } from '../../services/storage';
 import { audioService } from '../../utils/audio';
@@ -15,14 +15,17 @@ interface LearningSessionProps {
   config: SessionConfig;
   onExit: () => void;
   onGoVocabulary: () => void;
+  appLang?: AppLanguage;
 }
 
 export function LearningSession({
   config,
   onExit,
   onGoVocabulary,
+  appLang = 'pt',
 }: LearningSessionProps) {
-  const questions = useMemo(() => generateSessionQuestions(config), [config]);
+  const studyLang = config.studyLanguage || StorageService.getProfile().currentStudyLanguage || 'en';
+  const questions = useMemo(() => generateSessionQuestions(config, appLang), [config, appLang]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -173,11 +176,11 @@ export function LearningSession({
             <span>
               Pergunta {currentIndex + 1} de {questions.length}
             </span>
-            <span className="text-[#8B5CF6] font-bold">{progressPercent}%</span>
+            <span className="text-[#7C3AED] font-bold">{progressPercent}%</span>
           </div>
           <div className="w-full h-2 bg-[#F3F0FF] rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-[#8B5CF6] rounded-full"
+              className="h-full bg-[#7C3AED] rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
               transition={{ duration: 0.3 }}
@@ -197,8 +200,8 @@ export function LearningSession({
               <span>x{currentCombo} combo</span>
             </motion.div>
           ) : (
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F3F0FF] text-[#8B5CF6] border border-purple-100 font-bold text-xs">
-              <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F3F0FF] text-[#7C3AED] border border-purple-100 font-bold text-xs">
+              <Sparkles className="w-3.5 h-3.5 text-[#7C3AED]" />
               <span>Praticando</span>
             </div>
           )}
@@ -224,6 +227,7 @@ export function LearningSession({
                   isAnswered={isAnswered}
                   isCorrect={isCorrect}
                   onSelectOption={handleSelectOption}
+                  studyLang={studyLang}
                 />
               )}
 
@@ -234,6 +238,7 @@ export function LearningSession({
                   isAnswered={isAnswered}
                   isCorrect={isCorrect}
                   onSelectOption={handleSelectOption}
+                  studyLang={studyLang}
                 />
               )}
 
@@ -242,6 +247,8 @@ export function LearningSession({
                   question={currentQuestion}
                   isAnswered={isAnswered}
                   onComplete={handlePairMatchComplete}
+                  studyLang={studyLang}
+                  appLang={appLang}
                 />
               )}
 
@@ -252,6 +259,7 @@ export function LearningSession({
                   isAnswered={isAnswered}
                   isCorrect={isCorrect}
                   onSelectOption={handleSelectOption}
+                  studyLang={studyLang}
                 />
               )}
             </motion.div>
@@ -335,7 +343,7 @@ export function LearningSession({
               type="button"
               onClick={handleNext}
               id="session-continue-btn"
-              className={`w-full sm:w-auto min-w-[160px] flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-base text-white shadow-lg active:scale-95 transition-all ${
+              className={`w-full sm:w-auto min-w-[160px] flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl font-bold text-sm sm:text-base text-white shadow-lg active:scale-95 transition-all cursor-pointer ${
                 isCorrect
                   ? 'bg-emerald-600 hover:bg-emerald-700 shadow-emerald-600/25'
                   : 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/25'

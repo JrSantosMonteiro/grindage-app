@@ -3,26 +3,26 @@ import {
   Search,
   Star,
   Volume2,
-  Filter,
   BookOpen,
-  CheckCircle2,
-  RotateCcw,
-  Sparkles,
   Play,
-  Layers,
 } from 'lucide-react';
-import { motion } from 'motion/react';
 import {
-  LearningStatus,
+  AppLanguage,
   SessionConfig,
+  StudyLanguage,
   VocabularyCategory,
   VocabularyItem,
   WordUserStatus,
 } from '../../types';
-import { INITIAL_VOCABULARY } from '../../data/vocabulary';
+import {
+  getVocabularyByLanguage,
+  getWordMeaning,
+  getWordTranslation,
+} from '../../data/vocabulary';
 import { CATEGORIES, getCategoryMeta } from '../../data/categories';
 import { audioService } from '../../utils/audio';
 import { WordDetailModal } from './WordDetailModal';
+import { SUPPORTED_LANGUAGES, t } from '../../i18n/translations';
 
 interface VocabularyPageProps {
   wordStatuses: Record<string, WordUserStatus>;
@@ -30,6 +30,8 @@ interface VocabularyPageProps {
   onStartSession: (config: SessionConfig) => void;
   selectedWordFromState?: VocabularyItem | null;
   onClearSelectedWord?: () => void;
+  studyLang?: StudyLanguage;
+  appLang?: AppLanguage;
 }
 
 export function VocabularyPage({
@@ -38,12 +40,17 @@ export function VocabularyPage({
   onStartSession,
   selectedWordFromState,
   onClearSelectedWord,
+  studyLang = 'en',
+  appLang = 'pt',
 }: VocabularyPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'learning' | 'mastered' | 'favorites' | 'known'>('all');
   const [selectedCategory, setSelectedCategory] = useState<VocabularyCategory | 'all'>('all');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const [modalWord, setModalWord] = useState<VocabularyItem | null>(selectedWordFromState || null);
+
+  const currentVocab = getVocabularyByLanguage(studyLang);
+  const studyLangInfo = SUPPORTED_LANGUAGES[studyLang] || SUPPORTED_LANGUAGES.en;
 
   // Sync if external detail selected
   if (selectedWordFromState && modalWord?.id !== selectedWordFromState.id) {
@@ -52,7 +59,7 @@ export function VocabularyPage({
 
   // Filtered vocabulary list
   const filteredList = useMemo(() => {
-    return INITIAL_VOCABULARY.filter((item) => {
+    return currentVocab.filter((item) => {
       const userStatus = wordStatuses[item.id] || {
         wordId: item.id,
         status: 'new',
@@ -61,13 +68,16 @@ export function VocabularyPage({
         isFavorite: false,
       };
 
+      const trans = getWordTranslation(item, appLang);
+      const meaning = getWordMeaning(item, appLang);
+
       // Search match
       const query = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !query ||
         item.word.toLowerCase().includes(query) ||
-        item.translation.toLowerCase().includes(query) ||
-        item.meaning.toLowerCase().includes(query) ||
+        trans.toLowerCase().includes(query) ||
+        meaning.toLowerCase().includes(query) ||
         item.example.toLowerCase().includes(query) ||
         item.relatedWords.some((w) => w.toLowerCase().includes(query));
 
@@ -87,17 +97,17 @@ export function VocabularyPage({
 
       return true;
     });
-  }, [searchQuery, activeTab, selectedCategory, selectedDifficulty, wordStatuses]);
+  }, [currentVocab, searchQuery, activeTab, selectedCategory, selectedDifficulty, wordStatuses, appLang]);
 
   // Counts for tabs
   const tabCounts = useMemo(() => {
-    const total = INITIAL_VOCABULARY.length;
+    const total = currentVocab.length;
     let learning = 0;
     let mastered = 0;
     let known = 0;
     let favorites = 0;
 
-    INITIAL_VOCABULARY.forEach((item) => {
+    currentVocab.forEach((item) => {
       const s = wordStatuses[item.id];
       if (s?.isFavorite) favorites++;
       if (s?.status === 'learning') learning++;
@@ -106,22 +116,22 @@ export function VocabularyPage({
     });
 
     return { total, learning, mastered, known, favorites };
-  }, [wordStatuses]);
+  }, [currentVocab, wordStatuses]);
 
   return (
     <div className="space-y-6 w-full pb-12" id="vocabulary-view">
       {/* Header Banner */}
-      <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <span className="inline-block px-3.5 py-1.5 rounded-2xl bg-[#F3F0FF] text-[#8B5CF6] text-xs font-bold tracking-wide mb-3">
-            Biblioteca Pessoal
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl bg-[#F3F0FF] text-[#7C3AED] text-xs font-bold tracking-wide mb-3">
+            <span>{studyLangInfo.flag}</span>
+            <span>{t('lang.studying', appLang)}: {studyLangInfo.nativeName}</span>
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#1F1F23] font-display">
-            Meu Vocabulário ({tabCounts.total})
+            {t('vocab.title', appLang)} ({tabCounts.total})
           </h2>
           <p className="text-xs sm:text-sm text-[#7E7C89] mt-1 max-w-xl">
-            Acompanhe seu dicionário ativo de termos, gírias e expressões. Revise significados,
-            ouça a pronúncia e pratique palavras específicas.
+            {t('vocab.subtitle', appLang)}
           </p>
         </div>
 
@@ -133,17 +143,18 @@ export function VocabularyPage({
               difficulty: 'all',
               exerciseType: 'mixed',
               questionCount: 10,
+              studyLanguage: studyLang,
             })
           }
-          className="self-start md:self-center flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-bold text-sm shadow-md shadow-purple-200/50 active:scale-95 transition-all shrink-0 cursor-pointer"
+          className="self-start md:self-center flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-md shadow-purple-200/50 active:scale-95 transition-all shrink-0 cursor-pointer"
         >
           <Play className="w-4 h-4 fill-current" />
-          <span>Praticar Vocabulário</span>
+          <span>{t('vocab.practiceBtn', appLang)}</span>
         </button>
       </div>
 
       {/* Search & Filters Toolbar */}
-      <div className="bg-white p-4 sm:p-5 rounded-[24px] border border-[#ECEBF1] shadow-xs space-y-4">
+      <div className="bg-white p-4 sm:p-5 rounded-[24px] border border-[#ECEBF1] shadow-2xs space-y-4">
         {/* Search Bar */}
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
@@ -152,8 +163,8 @@ export function VocabularyPage({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Buscar por palavra em inglês, tradução, exemplo ou tag..."
-              className="w-full pl-10 pr-4 py-2.5 bg-[#F8F7FA] border border-[#ECEBF1] rounded-xl text-xs sm:text-sm text-[#1F1F23] placeholder:text-[#7E7C89] focus:outline-none focus:border-[#8B5CF6] focus:bg-white transition-all"
+              placeholder={t('vocab.searchPlaceholder', appLang)}
+              className="w-full pl-10 pr-4 py-2.5 bg-[#F8F7FA] border border-[#ECEBF1] rounded-xl text-xs sm:text-sm text-[#1F1F23] placeholder:text-[#7E7C89] focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-all"
             />
           </div>
 
@@ -161,37 +172,40 @@ export function VocabularyPage({
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value as VocabularyCategory | 'all')}
-            className="py-2.5 px-3 bg-[#F8F7FA] border border-[#ECEBF1] rounded-xl text-xs sm:text-sm font-semibold text-[#1F1F23] focus:outline-none focus:border-[#8B5CF6] cursor-pointer"
+            className="py-2.5 px-3 bg-[#F8F7FA] border border-[#ECEBF1] rounded-xl text-xs sm:text-sm font-semibold text-[#1F1F23] focus:outline-none focus:border-[#7C3AED] cursor-pointer"
           >
-            <option value="all">Todas as Categorias</option>
-            {CATEGORIES.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
+            <option value="all">{t('learn.filterAll', appLang)}</option>
+            {CATEGORIES.map((c) => {
+              const meta = getCategoryMeta(c.id, appLang);
+              return (
+                <option key={c.id} value={c.id}>
+                  {meta.name}
+                </option>
+              );
+            })}
           </select>
 
           {/* Difficulty Dropdown */}
           <select
             value={selectedDifficulty}
             onChange={(e) => setSelectedDifficulty(e.target.value)}
-            className="py-2.5 px-3 bg-[#F8F7FA] border border-[#ECEBF1] rounded-xl text-xs sm:text-sm font-semibold text-[#1F1F23] focus:outline-none focus:border-[#8B5CF6] cursor-pointer"
+            className="py-2.5 px-3 bg-[#F8F7FA] border border-[#ECEBF1] rounded-xl text-xs sm:text-sm font-semibold text-[#1F1F23] focus:outline-none focus:border-[#7C3AED] cursor-pointer"
           >
-            <option value="all">Todas as Dificuldades</option>
-            <option value="basic">Básico</option>
-            <option value="intermediate">Intermediário</option>
-            <option value="advanced">Avançado</option>
+            <option value="all">{t('session.diffAll', appLang)}</option>
+            <option value="basic">{t('session.diffBasic', appLang)}</option>
+            <option value="intermediate">{t('session.diffMedium', appLang)}</option>
+            <option value="advanced">{t('session.diffAdvanced', appLang)}</option>
           </select>
         </div>
 
         {/* Status Tab Filters */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           {[
-            { id: 'all', label: 'Todas', count: tabCounts.total },
-            { id: 'learning', label: 'Aprendendo', count: tabCounts.learning },
-            { id: 'known', label: 'Conhecidas', count: tabCounts.known },
-            { id: 'mastered', label: 'Dominadas', count: tabCounts.mastered },
-            { id: 'favorites', label: 'Favoritas', count: tabCounts.favorites, icon: Star },
+            { id: 'all', label: t('vocab.filterAll', appLang), count: tabCounts.total },
+            { id: 'learning', label: t('vocab.filterLearning', appLang), count: tabCounts.learning },
+            { id: 'known', label: t('vocab.filterKnown', appLang), count: tabCounts.known },
+            { id: 'mastered', label: t('vocab.filterMastered', appLang), count: tabCounts.mastered },
+            { id: 'favorites', label: t('vocab.filterFavorites', appLang), count: tabCounts.favorites, icon: Star },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -202,8 +216,8 @@ export function VocabularyPage({
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                   isActive
-                    ? 'bg-[#8B5CF6] text-white shadow-xs'
-                    : 'bg-[#F8F7FA] text-[#7E7C89] hover:bg-[#F3F0FF] hover:text-[#8B5CF6]'
+                    ? 'bg-[#7C3AED] text-white shadow-xs'
+                    : 'bg-[#F8F7FA] text-[#7E7C89] hover:bg-[#F3F0FF] hover:text-[#7C3AED]'
                 }`}
               >
                 {Icon && <Icon className={`w-3.5 h-3.5 ${isActive ? 'fill-current' : ''}`} />}
@@ -224,10 +238,10 @@ export function VocabularyPage({
       {/* Vocabulary Items Grid */}
       {filteredList.length === 0 ? (
         <div className="bg-white rounded-[32px] p-12 text-center border border-[#ECEBF1]">
-          <BookOpen className="w-12 h-12 text-[#8B5CF6]/50 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-[#1F1F23] font-display">Nenhuma palavra encontrada</h3>
+          <BookOpen className="w-12 h-12 text-[#7C3AED]/50 mx-auto mb-3" />
+          <h3 className="text-lg font-bold text-[#1F1F23] font-display">{t('vocab.emptyTitle', appLang)}</h3>
           <p className="text-xs text-[#7E7C89] mt-1 max-w-sm mx-auto">
-            Tente ajustar os filtros de busca ou pratique novas sessões para desbloquear mais vocabulário.
+            {t('vocab.emptySub', appLang)}
           </p>
         </div>
       ) : (
@@ -240,19 +254,21 @@ export function VocabularyPage({
               timesCorrect: 0,
               isFavorite: false,
             };
-            const catMeta = getCategoryMeta(item.category);
+            const catMeta = getCategoryMeta(item.category, appLang);
             const isFav = userStatus.isFavorite;
+            const trans = getWordTranslation(item, appLang);
+            const meaning = getWordMeaning(item, appLang);
 
             return (
               <div
                 key={item.id}
                 onClick={() => setModalWord(item)}
-                className="group relative bg-white rounded-[24px] p-5 border border-[#ECEBF1] hover:border-[#8B5CF6] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+                className="group relative bg-white rounded-[24px] p-5 border border-[#ECEBF1] hover:border-[#7C3AED] hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
               >
                 <div>
                   {/* Top row: Category + Favorite button */}
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#F3F0FF] text-[#8B5CF6] border border-purple-100">
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#F3F0FF] text-[#7C3AED] border border-purple-100">
                       {catMeta.name}
                     </span>
 
@@ -267,7 +283,7 @@ export function VocabularyPage({
                           ? 'text-amber-500 bg-amber-50'
                           : 'text-[#7E7C89]/60 hover:text-amber-400 hover:bg-[#F8F7FA]'
                       }`}
-                      title={isFav ? 'Remover favorito' : 'Favoritar'}
+                      title="Favorito"
                     >
                       <Star className={`w-4 h-4 ${isFav ? 'fill-current' : ''}`} />
                     </button>
@@ -275,16 +291,16 @@ export function VocabularyPage({
 
                   {/* Word & Speaker */}
                   <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-bold text-[#1F1F23] font-display group-hover:text-[#8B5CF6] transition-colors">
+                    <h3 className="text-lg font-bold text-[#1F1F23] font-display group-hover:text-[#7C3AED] transition-colors">
                       {item.word}
                     </h3>
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        audioService.speak(item.word);
+                        audioService.speak(item.word, studyLang);
                       }}
-                      className="p-1 text-[#7E7C89] hover:text-[#8B5CF6] rounded-md hover:bg-[#F3F0FF] transition-colors cursor-pointer"
+                      className="p-1 text-[#7E7C89] hover:text-[#7C3AED] rounded-md hover:bg-[#F3F0FF] transition-colors cursor-pointer"
                       title="Ouvir"
                     >
                       <Volume2 className="w-3.5 h-3.5" />
@@ -293,12 +309,12 @@ export function VocabularyPage({
 
                   {/* Translation */}
                   <p className="text-xs sm:text-sm font-semibold text-[#2D2D2D] mt-0.5">
-                    {item.translation}
+                    {trans}
                   </p>
 
                   {/* Meaning snippet */}
                   <p className="text-xs text-[#7E7C89] mt-1.5 line-clamp-2">
-                    {item.meaning}
+                    {meaning}
                   </p>
                 </div>
 
@@ -312,24 +328,24 @@ export function VocabularyPage({
                         ? 'bg-blue-50 text-blue-700 border border-blue-100'
                         : userStatus.status === 'learning'
                         ? 'bg-amber-50 text-amber-700 border border-amber-100'
-                        : 'bg-[#F3F0FF] text-[#8B5CF6] border border-purple-100'
+                        : 'bg-[#F3F0FF] text-[#7C3AED] border border-purple-100'
                     }`}
                   >
                     {userStatus.status === 'mastered'
-                      ? 'Dominada'
+                      ? t('vocab.filterMastered', appLang)
                       : userStatus.status === 'known'
-                      ? 'Conhecida'
+                      ? t('vocab.filterKnown', appLang)
                       : userStatus.status === 'learning'
-                      ? 'Aprendendo'
-                      : 'Nova'}
+                      ? t('vocab.filterLearning', appLang)
+                      : t('vocab.filterNew', appLang)}
                   </span>
 
                   <span className="text-[10px] font-medium text-[#7E7C89] capitalize">
                     {item.difficulty === 'basic'
-                      ? 'Básico'
+                      ? t('session.diffBasic', appLang)
                       : item.difficulty === 'intermediate'
-                      ? 'Médio'
-                      : 'Avançado'}
+                      ? t('session.diffMedium', appLang)
+                      : t('session.diffAdvanced', appLang)}
                   </span>
                 </div>
               </div>
@@ -344,14 +360,21 @@ export function VocabularyPage({
           item={modalWord}
           userStatus={wordStatuses[modalWord.id]}
           isOpen={Boolean(modalWord)}
+          studyLang={studyLang}
+          appLang={appLang}
           onClose={() => {
             setModalWord(null);
             if (onClearSelectedWord) onClearSelectedWord();
           }}
           onToggleFavorite={onToggleFavorite}
-          onPracticeWord={onStartSession}
+          onPracticeWord={(cfg) => {
+            onStartSession({
+              ...cfg,
+              studyLanguage: studyLang,
+            });
+          }}
           onSelectRelatedWord={(rw) => {
-            const found = INITIAL_VOCABULARY.find(
+            const found = currentVocab.find(
               (v) => v.word.toLowerCase() === rw.toLowerCase()
             );
             if (found) setModalWord(found);

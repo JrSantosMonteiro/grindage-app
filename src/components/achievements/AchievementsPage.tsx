@@ -1,9 +1,11 @@
 import { Trophy, Flame, Zap, BookOpen, GraduationCap, Sparkles, Star, CheckCircle2, Lock } from 'lucide-react';
-import { Achievement, UserProfile } from '../../types';
+import { Achievement, AppLanguage, UserProfile } from '../../types';
+import { t } from '../../i18n/translations';
 
 interface AchievementsPageProps {
   achievements: Achievement[];
   profile: UserProfile;
+  appLang?: AppLanguage;
 }
 
 const ICON_MAP: Record<string, typeof Trophy> = {
@@ -17,7 +19,7 @@ const ICON_MAP: Record<string, typeof Trophy> = {
   CheckCircle2,
 };
 
-export function AchievementsPage({ achievements, profile }: AchievementsPageProps) {
+export function AchievementsPage({ achievements, profile, appLang = 'pt' }: AchievementsPageProps) {
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
   const totalCount = achievements.length;
   const completionPercent = Math.round((unlockedCount / Math.max(1, totalCount)) * 100);
@@ -25,13 +27,13 @@ export function AchievementsPage({ achievements, profile }: AchievementsPageProp
   return (
     <div className="space-y-6 w-full pb-12" id="achievements-view">
       {/* Header Banner */}
-      <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <span className="inline-block px-3.5 py-1.5 rounded-2xl bg-[#F3F0FF] text-[#8B5CF6] text-xs font-bold tracking-wide mb-3">
+          <span className="inline-block px-3.5 py-1.5 rounded-2xl bg-[#F3F0FF] text-[#7C3AED] text-xs font-bold tracking-wide mb-3">
             Mural de Honra
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#1F1F23] font-display">
-            Conquistas & Troféus
+            {t('nav.achievements', appLang)}
           </h2>
           <p className="text-xs sm:text-sm text-[#7E7C89] mt-1 max-w-xl">
             Cumpra desafios e metas de vocabulário para desbloquear medalhas e troféus exclusivos no seu perfil.
@@ -42,11 +44,11 @@ export function AchievementsPage({ achievements, profile }: AchievementsPageProp
         <div className="p-4.5 bg-[#F8F7FA] rounded-2xl border border-[#ECEBF1] min-w-[220px]">
           <div className="flex justify-between items-center text-xs font-bold text-[#1F1F23] mb-2">
             <span>Desbloqueadas</span>
-            <span className="text-[#8B5CF6]">{unlockedCount} de {totalCount}</span>
+            <span className="text-[#7C3AED]">{unlockedCount} de {totalCount}</span>
           </div>
           <div className="w-full h-2 bg-[#ECEBF1] rounded-full overflow-hidden mb-1.5">
             <div
-              className="h-full bg-[#8B5CF6] rounded-full"
+              className="h-full bg-[#7C3AED] rounded-full"
               style={{ width: `${completionPercent}%` }}
             />
           </div>
@@ -67,13 +69,13 @@ export function AchievementsPage({ achievements, profile }: AchievementsPageProp
               key={ach.id}
               className={`relative rounded-[24px] p-5 sm:p-6 border transition-all flex items-start gap-4 ${
                 ach.unlocked
-                  ? 'bg-white border-[#ECEBF1] shadow-xs hover:border-[#8B5CF6] hover:shadow-md'
+                  ? 'bg-white border-[#ECEBF1] shadow-2xs hover:border-[#7C3AED] hover:shadow-md'
                   : 'bg-[#F8F7FA] border-[#ECEBF1] opacity-75'
               }`}
             >
               {/* Icon / Badge */}
               <div
-                className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-sm ${
+                className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${
                   ach.unlocked
                     ? 'bg-gradient-to-tr from-amber-400 to-amber-500 text-white shadow-amber-500/20 ring-4 ring-amber-50'
                     : 'bg-[#ECEBF1] text-[#7E7C89]'
@@ -121,7 +123,7 @@ export function AchievementsPage({ achievements, profile }: AchievementsPageProp
                       className={`h-full rounded-full transition-all duration-500 ${
                         ach.unlocked
                           ? 'bg-emerald-500'
-                          : 'bg-[#8B5CF6]'
+                          : 'bg-[#7C3AED]'
                       }`}
                       style={{ width: `${progPercent}%` }}
                     />

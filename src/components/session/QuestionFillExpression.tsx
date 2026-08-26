@@ -1,7 +1,7 @@
 import React from 'react';
 import { Volume2, CheckCircle, XCircle } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Question } from '../../types';
+import { Question, StudyLanguage } from '../../types';
 import { audioService } from '../../utils/audio';
 
 interface QuestionFillExpressionProps {
@@ -10,6 +10,7 @@ interface QuestionFillExpressionProps {
   isAnswered: boolean;
   isCorrect: boolean;
   onSelectOption: (option: string) => void;
+  studyLang?: StudyLanguage;
 }
 
 export function QuestionFillExpression({
@@ -18,11 +19,12 @@ export function QuestionFillExpression({
   isAnswered,
   isCorrect,
   onSelectOption,
+  studyLang = 'en',
 }: QuestionFillExpressionProps) {
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
     // Speak full expression if answered or current word
-    audioService.speak(isAnswered ? question.vocabItem.word : question.prompt);
+    audioService.speak(isAnswered ? question.vocabItem.word : question.prompt, studyLang);
   };
 
   // Render prompt with stylish blank

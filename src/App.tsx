@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { NavTab, SessionConfig, UserProfile, VocabularyCategory, VocabularyItem, WordUserStatus } from './types';
+import { AppLanguage, NavTab, SessionConfig, StudyLanguage, UserProfile, VocabularyCategory, VocabularyItem, WordUserStatus } from './types';
 import { StorageService } from './services/storage';
 import { audioService } from './utils/audio';
 import { Sidebar } from './components/layout/Sidebar';
@@ -31,16 +31,34 @@ export default function App() {
   const [selectedWordDetail, setSelectedWordDetail] = useState<VocabularyItem | null>(null);
   const [soundEnabled, setSoundEnabled] = useState(true);
 
-  // Sync state whenever returning to views
+  const studyLang = profile.currentStudyLanguage || 'en';
+  const appLang = profile.appLanguage || 'pt';
+
+  // Sync state whenever returning to views or switching languages
   const refreshStorageData = () => {
-    setProfile(StorageService.getProfile());
-    setWordStatuses(StorageService.getWordStatuses());
+    const updatedProfile = StorageService.getProfile();
+    setProfile(updatedProfile);
+    setWordStatuses(StorageService.getWordStatuses(updatedProfile.currentStudyLanguage));
     setAchievements(StorageService.getAchievements());
+  };
+
+  // Switch study language
+  const handleSwitchStudyLanguage = (lang: StudyLanguage) => {
+    const updated = StorageService.switchStudyLanguage(lang);
+    setProfile(updated);
+    setWordStatuses(StorageService.getWordStatuses(lang));
+    setAchievements(StorageService.getAchievements());
+  };
+
+  // Switch UI app language
+  const handleSwitchAppLanguage = (lang: AppLanguage) => {
+    const updated = StorageService.switchAppLanguage(lang);
+    setProfile(updated);
   };
 
   // Toggle favorite
   const handleToggleFavorite = (wordId: string) => {
-    const updated = StorageService.toggleFavorite(wordId);
+    const updated = StorageService.toggleFavorite(wordId, studyLang);
     setWordStatuses((prev) => ({
       ...prev,
       [wordId]: updated,
@@ -77,6 +95,7 @@ export default function App() {
         difficulty: 'all',
         exerciseType: 'mixed',
         questionCount: 10,
+        studyLanguage: studyLang,
       });
     }
   };
@@ -85,7 +104,11 @@ export default function App() {
   if (activeSessionConfig) {
     return (
       <LearningSession
-        config={activeSessionConfig}
+        config={{
+          ...activeSessionConfig,
+          studyLanguage: activeSessionConfig.studyLanguage || studyLang,
+        }}
+        appLang={appLang}
         onExit={() => {
           setActiveSessionConfig(null);
           refreshStorageData();
@@ -109,6 +132,8 @@ export default function App() {
         onOpenStreakModal={() => setIsStreakModalOpen(true)}
         onToggleSound={handleToggleSound}
         soundEnabled={soundEnabled}
+        onSwitchStudyLanguage={handleSwitchStudyLanguage}
+        onSwitchAppLanguage={handleSwitchAppLanguage}
       />
 
       {/* Main Content Area */}
@@ -127,6 +152,8 @@ export default function App() {
                 setSelectedWordDetail(word);
                 setActiveTab('vocabulary');
               }}
+              onSwitchStudyLanguage={handleSwitchStudyLanguage}
+              onSwitchAppLanguage={handleSwitchAppLanguage}
             />
           )}
 
@@ -134,12 +161,16 @@ export default function App() {
             <LearnPage
               wordStatuses={wordStatuses}
               onStartSession={(cfg) => setActiveSessionConfig(cfg)}
+              studyLang={studyLang}
+              appLang={appLang}
             />
           )}
 
           {activeTab === 'games' && (
             <GamesPage
               onStartSession={(cfg) => setActiveSessionConfig(cfg)}
+              studyLang={studyLang}
+              appLang={appLang}
             />
           )}
 
@@ -150,6 +181,8 @@ export default function App() {
               onStartSession={(cfg) => setActiveSessionConfig(cfg)}
               selectedWordFromState={selectedWordDetail}
               onClearSelectedWord={() => setSelectedWordDetail(null)}
+              studyLang={studyLang}
+              appLang={appLang}
             />
           )}
 
@@ -157,6 +190,7 @@ export default function App() {
             <AchievementsPage
               achievements={achievements}
               profile={profile}
+              appLang={appLang}
             />
           )}
 
@@ -169,6 +203,8 @@ export default function App() {
               onResetData={handleResetData}
               soundEnabled={soundEnabled}
               onToggleSound={handleToggleSound}
+              onSwitchStudyLanguage={handleSwitchStudyLanguage}
+              onSwitchAppLanguage={handleSwitchAppLanguage}
             />
           )}
         </main>
@@ -178,6 +214,7 @@ export default function App() {
       <BottomNavigation
         currentTab={activeTab}
         onSelectTab={setActiveTab}
+        appLang={appLang}
       />
 
       {/* Global Modals */}
@@ -185,6 +222,7 @@ export default function App() {
         isOpen={isStreakModalOpen}
         onClose={() => setIsStreakModalOpen(false)}
         profile={profile}
+        appLang={appLang}
       />
 
       {sessionModalCategory && (
@@ -192,6 +230,8 @@ export default function App() {
           isOpen={Boolean(sessionModalCategory)}
           onClose={() => setSessionModalCategory(null)}
           category={sessionModalCategory}
+          studyLang={studyLang}
+          appLang={appLang}
           onStartSession={(cfg) => {
             setSessionModalCategory(null);
             setActiveSessionConfig(cfg);

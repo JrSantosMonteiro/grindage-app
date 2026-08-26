@@ -18,12 +18,12 @@ import {
   Search,
   BookOpen,
 } from 'lucide-react';
-import { CategoryMeta, SessionConfig, VocabularyCategory, WordUserStatus } from '../../types';
-import { CATEGORIES } from '../../data/categories';
-import { INITIAL_VOCABULARY } from '../../data/vocabulary';
+import { AppLanguage, SessionConfig, StudyLanguage, VocabularyCategory, WordUserStatus } from '../../types';
+import { CATEGORIES, getCategoryMeta } from '../../data/categories';
+import { getVocabularyByLanguage } from '../../data/vocabulary';
 import { SessionModal } from './SessionModal';
+import { SUPPORTED_LANGUAGES, t } from '../../i18n/translations';
 
-// Icon Map helper
 const ICON_COMPONENTS: Record<string, typeof Coffee> = {
   Coffee,
   Plane,
@@ -45,17 +45,28 @@ const ICON_COMPONENTS: Record<string, typeof Coffee> = {
 interface LearnPageProps {
   wordStatuses: Record<string, WordUserStatus>;
   onStartSession: (config: SessionConfig) => void;
+  studyLang?: StudyLanguage;
+  appLang?: AppLanguage;
 }
 
-export function LearnPage({ wordStatuses, onStartSession }: LearnPageProps) {
+export function LearnPage({
+  wordStatuses,
+  onStartSession,
+  studyLang = 'en',
+  appLang = 'pt',
+}: LearnPageProps) {
   const [selectedCategory, setSelectedCategory] = useState<VocabularyCategory | 'all' | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'essential' | 'slang' | 'business'>('all');
 
+  const vocab = getVocabularyByLanguage(studyLang);
+  const studyLangInfo = SUPPORTED_LANGUAGES[studyLang] || SUPPORTED_LANGUAGES.en;
+
   const filteredCategories = CATEGORIES.filter((cat) => {
+    const meta = getCategoryMeta(cat.id, appLang);
     const matchesSearch =
-      cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cat.description.toLowerCase().includes(searchQuery.toLowerCase());
+      meta.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      meta.description.toLowerCase().includes(searchQuery.toLowerCase());
 
     if (!matchesSearch) return false;
 
@@ -67,7 +78,7 @@ export function LearnPage({ wordStatuses, onStartSession }: LearnPageProps) {
 
   // Calculate stats for each category
   const getCategoryStats = (catId: VocabularyCategory) => {
-    const catWords = INITIAL_VOCABULARY.filter((v) => v.category === catId);
+    const catWords = vocab.filter((v) => v.category === catId);
     const total = catWords.length;
     const learned = catWords.filter((v) => {
       const st = wordStatuses[v.id]?.status;
@@ -80,17 +91,17 @@ export function LearnPage({ wordStatuses, onStartSession }: LearnPageProps) {
   return (
     <div className="space-y-6 w-full pb-12" id="learn-view">
       {/* Header Banner */}
-      <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <span className="inline-block px-3.5 py-1.5 rounded-2xl bg-[#F3F0FF] text-[#8B5CF6] text-xs font-bold tracking-wide mb-3">
-            Aprender & Expandir
+          <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl bg-[#F3F0FF] text-[#7C3AED] text-xs font-bold tracking-wide mb-3">
+            <span>{studyLangInfo.flag}</span>
+            <span>{t('lang.studying', appLang)}: {studyLangInfo.nativeName}</span>
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold text-[#1F1F23] font-display">
-            Categorias de Vocabulário
+            {t('learn.title', appLang)}
           </h2>
           <p className="text-xs sm:text-sm text-[#7E7C89] mt-1 max-w-xl">
-            Selecione uma área temática para treinar vocabulário contextual, expressões reais,
-            gírias contemporâneas e expressões idiomáticas.
+            {t('learn.subtitle', appLang)}
           </p>
         </div>
 
@@ -98,10 +109,10 @@ export function LearnPage({ wordStatuses, onStartSession }: LearnPageProps) {
         <button
           onClick={() => setSelectedCategory('all')}
           id="learn-quick-all-btn"
-          className="self-start md:self-center flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-bold text-sm shadow-md shadow-purple-200/50 active:scale-95 transition-all shrink-0 cursor-pointer"
+          className="self-start md:self-center flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-sm shadow-md shadow-purple-200/50 active:scale-95 transition-all shrink-0 cursor-pointer"
         >
           <Play className="w-4 h-4 fill-current" />
-          <span>Sessão Geral Rápida</span>
+          <span>{t('learn.quickSession', appLang)}</span>
         </button>
       </div>
 
@@ -114,29 +125,29 @@ export function LearnPage({ wordStatuses, onStartSession }: LearnPageProps) {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar categoria..."
-            className="w-full pl-10 pr-4 py-2.5 bg-[#F8F7FA] border border-[#ECEBF1] rounded-xl text-xs sm:text-sm text-[#1F1F23] placeholder:text-[#7E7C89] focus:outline-none focus:border-[#8B5CF6] focus:bg-white transition-all"
+            placeholder={t('learn.searchPlaceholder', appLang)}
+            className="w-full pl-10 pr-4 py-2.5 bg-[#F8F7FA] border border-[#ECEBF1] rounded-xl text-xs sm:text-sm text-[#1F1F23] placeholder:text-[#7E7C89] focus:outline-none focus:border-[#7C3AED] focus:bg-white transition-all"
           />
         </div>
 
         {/* Filter Pills */}
         <div className="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
           {[
-            { id: 'all', label: 'Todas' },
-            { id: 'essential', label: 'Essenciais' },
-            { id: 'slang', label: 'Gírias & Expressões' },
-            { id: 'business', label: 'Trabalho & Negócios' },
+            { id: 'all', key: 'learn.filterAll' },
+            { id: 'essential', key: 'learn.filterEssential' },
+            { id: 'slang', key: 'learn.filterSlang' },
+            { id: 'business', key: 'learn.filterBusiness' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setFilterType(tab.id as typeof filterType)}
               className={`px-3.5 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer ${
                 filterType === tab.id
-                  ? 'bg-[#8B5CF6] text-white shadow-xs'
-                  : 'bg-[#F8F7FA] text-[#7E7C89] hover:bg-[#F3F0FF] hover:text-[#8B5CF6]'
+                  ? 'bg-[#7C3AED] text-white shadow-xs'
+                  : 'bg-[#F8F7FA] text-[#7E7C89] hover:bg-[#F3F0FF] hover:text-[#7C3AED]'
               }`}
             >
-              {tab.label}
+              {t(tab.key, appLang)}
             </button>
           ))}
         </div>
@@ -146,13 +157,14 @@ export function LearnPage({ wordStatuses, onStartSession }: LearnPageProps) {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5" id="categories-grid">
         {filteredCategories.map((category) => {
           const Icon = ICON_COMPONENTS[category.iconName] || BookOpen;
+          const meta = getCategoryMeta(category.id, appLang);
           const stats = getCategoryStats(category.id);
 
           return (
             <div
               key={category.id}
               onClick={() => setSelectedCategory(category.id)}
-              className="group relative bg-white rounded-[24px] p-6 border border-[#ECEBF1] hover:border-[#8B5CF6] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between"
+              className="group relative bg-white rounded-[24px] p-6 border border-[#ECEBF1] hover:border-[#7C3AED] hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer flex flex-col justify-between"
             >
               <div>
                 {/* Header of card: Icon + Badge */}
@@ -163,40 +175,40 @@ export function LearnPage({ wordStatuses, onStartSession }: LearnPageProps) {
                     <Icon className="w-6 h-6" />
                   </div>
 
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#F3F0FF] text-[#8B5CF6] border border-purple-100">
-                    {category.badge}
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-[#F3F0FF] text-[#7C3AED] border border-purple-100">
+                    {meta.badge}
                   </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-[#1F1F23] font-display group-hover:text-[#8B5CF6] transition-colors">
-                  {category.name}
+                <h3 className="text-lg font-bold text-[#1F1F23] font-display group-hover:text-[#7C3AED] transition-colors">
+                  {meta.name}
                 </h3>
                 <p className="text-xs text-[#7E7C89] mt-1 line-clamp-2">
-                  {category.description}
+                  {meta.description}
                 </p>
               </div>
 
               {/* Progress and Action Footer */}
               <div className="mt-5 pt-4 border-t border-[#ECEBF1]">
                 <div className="flex items-center justify-between text-xs font-bold text-[#7E7C89] mb-2">
-                  <span>{stats.learned} de {stats.total} palavras</span>
-                  <span className="text-[#8B5CF6] font-bold">{stats.percent}%</span>
+                  <span>{stats.learned} / {stats.total} {t('dash.words', appLang)}</span>
+                  <span className="text-[#7C3AED] font-bold">{stats.percent}%</span>
                 </div>
 
                 {/* Progress bar */}
                 <div className="w-full h-2 bg-[#F3F0FF] rounded-full overflow-hidden mb-3.5">
                   <div
-                    className="h-full bg-[#8B5CF6] rounded-full transition-all duration-500"
+                    className="h-full bg-[#7C3AED] rounded-full transition-all duration-500"
                     style={{ width: `${stats.percent}%` }}
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-medium text-[#7E7C89]">
-                    Toque para configurar
+                    {studyLangInfo.flag} {studyLangInfo.nativeName}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-xs font-bold text-[#8B5CF6] group-hover:translate-x-1 transition-transform">
-                    <span>Praticar</span>
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-[#7C3AED] group-hover:translate-x-1 transition-transform">
+                    <span>{t('learn.practice', appLang)}</span>
                     <Play className="w-3 h-3 fill-current ml-0.5" />
                   </span>
                 </div>
@@ -212,9 +224,14 @@ export function LearnPage({ wordStatuses, onStartSession }: LearnPageProps) {
           isOpen={Boolean(selectedCategory)}
           onClose={() => setSelectedCategory(null)}
           category={selectedCategory}
+          studyLang={studyLang}
+          appLang={appLang}
           onStartSession={(cfg) => {
             setSelectedCategory(null);
-            onStartSession(cfg);
+            onStartSession({
+              ...cfg,
+              studyLanguage: studyLang,
+            });
           }}
         />
       )}

@@ -1,123 +1,297 @@
-import { CategoryMeta, VocabularyCategory } from '../types';
+import { AppLanguage, CategoryMeta, VocabularyCategory } from '../types';
 
 export const CATEGORIES: CategoryMeta[] = [
   {
     id: 'daily',
     name: 'Cotidiano',
+    names: {
+      pt: 'Cotidiano',
+      es: 'Cotidiano & Rutina',
+      en: 'Daily Life',
+      fr: 'Vie Quotidienne',
+    },
     iconName: 'Coffee',
     description: 'Rotina, hábitos, casa e situações do dia a dia.',
+    descriptions: {
+      pt: 'Rotina, hábitos, casa e situações do dia a dia.',
+      es: 'Rutina, hábitos, hogar y situaciones de la vida diaria.',
+      en: 'Routine, habits, home, and everyday situations.',
+      fr: 'Routine, habitudes, maison et situations quotidiennes.',
+    },
     color: 'from-violet-500 to-purple-600',
     badge: 'Essencial',
   },
   {
     id: 'travel',
     name: 'Viagens',
+    names: {
+      pt: 'Viagens',
+      es: 'Viajes & Turismo',
+      en: 'Travel & Tourism',
+      fr: 'Voyages & Tourisme',
+    },
     iconName: 'Plane',
     description: 'Aeroporto, hotel, direções e turismo.',
+    descriptions: {
+      pt: 'Aeroporto, hotel, direções e turismo.',
+      es: 'Aeropuerto, hotel, direcciones y turismo.',
+      en: 'Airport, hotel, directions, and sightseeing.',
+      fr: 'Aéroport, hôtel, directions et tourisme.',
+    },
     color: 'from-indigo-500 to-violet-600',
     badge: 'Popular',
   },
   {
     id: 'work',
-    name: 'Trabalho',
+    name: 'Trabalho & Carreira',
+    names: {
+      pt: 'Trabalho & Carreira',
+      es: 'Trabajo & Carrera',
+      en: 'Work & Career',
+      fr: 'Travail & Carrière',
+    },
     iconName: 'Briefcase',
     description: 'Reuniões, e-mails, escritório e carreira.',
+    descriptions: {
+      pt: 'Reuniões, e-mails, escritório e carreira.',
+      es: 'Reuniones, correos, oficina y desarrollo profesional.',
+      en: 'Meetings, emails, office, and career development.',
+      fr: 'Réunions, courriels, bureau et carrière.',
+    },
     color: 'from-purple-600 to-violet-700',
     badge: 'Profissional',
   },
   {
     id: 'tech',
     name: 'Tecnologia',
+    names: {
+      pt: 'Tecnologia',
+      es: 'Tecnología & IA',
+      en: 'Technology & AI',
+      fr: 'Technologie & IA',
+    },
     iconName: 'Cpu',
     description: 'Software, hardware, inovação e inteligência.',
+    descriptions: {
+      pt: 'Software, hardware, inovação e inteligência.',
+      es: 'Software, hardware, innovación e inteligencia.',
+      en: 'Software, hardware, innovation, and AI.',
+      fr: 'Logiciel, matériel, innovation et IA.',
+    },
     color: 'from-violet-600 to-purple-800',
     badge: 'Moderno',
   },
   {
     id: 'internet',
     name: 'Internet & Redes',
+    names: {
+      pt: 'Internet & Redes',
+      es: 'Internet & Redes',
+      en: 'Internet & Social Media',
+      fr: 'Internet & Réseaux',
+    },
     iconName: 'Globe',
     description: 'Mídias sociais, memes, navegação e termos online.',
+    descriptions: {
+      pt: 'Mídias sociais, memes, navegação e termos online.',
+      es: 'Redes sociales, memes, navegación y cultura online.',
+      en: 'Social media, memes, browsing, and online culture.',
+      fr: 'Réseaux sociaux, mèmes, navigation et culture web.',
+    },
     color: 'from-purple-500 to-indigo-600',
     badge: 'Em Alta',
   },
   {
     id: 'gaming',
     name: 'Jogos & Cultura Pop',
+    names: {
+      pt: 'Jogos & Cultura Pop',
+      es: 'Juegos & Pop Culture',
+      en: 'Gaming & Pop Culture',
+      fr: 'Jeux & Culture Pop',
+    },
     iconName: 'Gamepad2',
     description: 'Games, streaming, termos competitivos e fandom.',
+    descriptions: {
+      pt: 'Games, streaming, termos competitivos e fandom.',
+      es: 'Videojuegos, streaming, términos competitivos y comunidad.',
+      en: 'Video games, streaming, competitive terms, and fandom.',
+      fr: 'Jeux vidéo, streaming, termes compétitifs et fandom.',
+    },
     color: 'from-violet-500 to-purple-700',
     badge: 'Divertido',
   },
   {
     id: 'cinema',
     name: 'Filmes & Séries',
+    names: {
+      pt: 'Filmes & Séries',
+      es: 'Películas & Series',
+      en: 'Movies & TV Series',
+      fr: 'Cinéma & Séries',
+    },
     iconName: 'Film',
     description: 'Cinema, roteiros, entretenimento e resenhas.',
+    descriptions: {
+      pt: 'Cinema, roteiros, entretenimento e resenhas.',
+      es: 'Cine, guiones, entretenimiento y reseñas.',
+      en: 'Cinema, screenplays, entertainment, and reviews.',
+      fr: 'Cinéma, scénarios, divertissement et critiques.',
+    },
     color: 'from-purple-600 to-indigo-700',
     badge: 'Cultura',
   },
   {
     id: 'music',
     name: 'Música',
+    names: {
+      pt: 'Música',
+      es: 'Música',
+      en: 'Music & Audio',
+      fr: 'Musique',
+    },
     iconName: 'Music',
     description: 'Gêneros, instrumentos, shows e letras.',
+    descriptions: {
+      pt: 'Gêneros, instrumentos, shows e letras.',
+      es: 'Géneros, instrumentos, conciertos y letras.',
+      en: 'Genres, instruments, live concerts, and lyrics.',
+      fr: 'Genres, instruments, concerts et paroles.',
+    },
     color: 'from-violet-400 to-purple-600',
     badge: 'Arte',
   },
   {
     id: 'food',
     name: 'Comida & Bebida',
+    names: {
+      pt: 'Comida & Bebida',
+      es: 'Comida & Bebida',
+      en: 'Food & Dining',
+      fr: 'Nourriture & Boissons',
+    },
     iconName: 'UtensilsCrossed',
     description: 'Restaurante, culinária, ingredientes e sabores.',
+    descriptions: {
+      pt: 'Restaurante, culinária, ingredientes e sabores.',
+      es: 'Restaurantes, cocina, ingredientes y sabores.',
+      en: 'Restaurants, cooking, ingredients, and tastes.',
+      fr: 'Restaurants, cuisine, ingrédients et saveurs.',
+    },
     color: 'from-purple-500 to-violet-600',
     badge: 'Saboroso',
   },
   {
     id: 'feelings',
     name: 'Sentimentos & Emoções',
+    names: {
+      pt: 'Sentimentos & Emoções',
+      es: 'Sentimientos & Emociones',
+      en: 'Feelings & Emotions',
+      fr: 'Sentiments & Émotions',
+    },
     iconName: 'Heart',
     description: 'Humor, reações, psicologia e estados de espírito.',
+    descriptions: {
+      pt: 'Humor, reações, psicologia e estados de espírito.',
+      es: 'Estado de ánimo, reacciones, psicología y emociones.',
+      en: 'Mood, reactions, psychology, and emotional states.',
+      fr: 'Humeur, réactions, psychologie et états d’âme.',
+    },
     color: 'from-violet-600 to-purple-500',
     badge: 'Expressivo',
   },
   {
     id: 'relationships',
     name: 'Relacionamentos',
+    names: {
+      pt: 'Relacionamentos',
+      es: 'Relaciones',
+      en: 'Relationships',
+      fr: 'Relations & Vie Sociale',
+    },
     iconName: 'Users',
     description: 'Amizades, encontros, convivência e família.',
+    descriptions: {
+      pt: 'Amizades, encontros, convivência e família.',
+      es: 'Amistad, citas, convivencia y familia.',
+      en: 'Friendship, dating, socializing, and family.',
+      fr: 'Amitiés, rencontres, vie sociale et famille.',
+    },
     color: 'from-indigo-500 to-purple-600',
     badge: 'Social',
   },
   {
     id: 'slang',
     name: 'Gírias Populares',
+    names: {
+      pt: 'Gírias Populares',
+      es: 'Jergas Populares',
+      en: 'Popular Slang',
+      fr: 'Argot & Expressions',
+    },
     iconName: 'Flame',
     description: 'Expressões urbanas, gírias atuais e linguagem das ruas.',
+    descriptions: {
+      pt: 'Expressões urbanas, gírias atuais e linguagem das ruas.',
+      es: 'Expresiones urbanas, modismos y lenguaje coloquial.',
+      en: 'Urban expressions, modern slang, and street talk.',
+      fr: 'Expressions urbaines, argot moderne et langage familier.',
+    },
     color: 'from-violet-600 to-fuchsia-600',
     badge: 'Nativo',
   },
   {
     id: 'idioms',
     name: 'Expressões Idiomáticas',
+    names: {
+      pt: 'Expressões Idiomáticas',
+      es: 'Modismos & Frases Hechas',
+      en: 'Idioms & Proverbs',
+      fr: 'Expressions Idiomatiques',
+    },
     iconName: 'Sparkles',
     description: 'Provérbios, metáforas e expressões consagradas.',
+    descriptions: {
+      pt: 'Provérbios, metáforas e expressões consagradas.',
+      es: 'Refranes, metáforas y expresiones consagradas.',
+      en: 'Sayings, metaphors, and common idiomatic phrases.',
+      fr: 'Proverbes, métaphores et locutions courantes.',
+    },
     color: 'from-purple-600 to-violet-800',
     badge: 'Fluência',
   },
   {
     id: 'business',
     name: 'Negócios & Mercado',
+    names: {
+      pt: 'Negócios & Mercado',
+      es: 'Negocios & Finanzas',
+      en: 'Business & Finance',
+      fr: 'Affaires & Entreprise',
+    },
     iconName: 'TrendingUp',
     description: 'Finanças, vendas, negociações e startups.',
+    descriptions: {
+      pt: 'Finanças, vendas, negociações e startups.',
+      es: 'Finanzas, ventas, negociaciones y startups.',
+      en: 'Finance, sales, negotiations, and ventures.',
+      fr: 'Finance, ventes, négociations et startups.',
+    },
     color: 'from-indigo-600 to-violet-700',
     badge: 'Estratégico',
   },
 ];
 
-export function getCategoryMeta(id: VocabularyCategory): CategoryMeta {
+export function getCategoryMeta(id: VocabularyCategory, appLang: AppLanguage = 'pt'): CategoryMeta {
   const found = CATEGORIES.find((c) => c.id === id);
-  if (found) return found;
+  if (found) {
+    return {
+      ...found,
+      name: found.names?.[appLang] || found.name,
+      description: found.descriptions?.[appLang] || found.description,
+    };
+  }
   return {
     id: 'daily',
     name: 'Geral',
@@ -127,3 +301,4 @@ export function getCategoryMeta(id: VocabularyCategory): CategoryMeta {
     badge: 'Geral',
   };
 }
+

@@ -1,14 +1,17 @@
 import { useState } from 'react';
 import { X, Play, Zap, CheckCircle2, Layers, BookOpen, Shuffle, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { DifficultyLevel, ExerciseType, SessionConfig, VocabularyCategory } from '../../types';
+import { AppLanguage, DifficultyLevel, ExerciseType, SessionConfig, StudyLanguage, VocabularyCategory } from '../../types';
 import { getCategoryMeta } from '../../data/categories';
+import { SUPPORTED_LANGUAGES, t } from '../../i18n/translations';
 
 interface SessionModalProps {
   isOpen: boolean;
   onClose: () => void;
   category: VocabularyCategory | 'all';
   onStartSession: (config: SessionConfig) => void;
+  studyLang?: StudyLanguage;
+  appLang?: AppLanguage;
 }
 
 export function SessionModal({
@@ -16,6 +19,8 @@ export function SessionModal({
   onClose,
   category,
   onStartSession,
+  studyLang = 'en',
+  appLang = 'pt',
 }: SessionModalProps) {
   const [difficulty, setDifficulty] = useState<DifficultyLevel | 'all'>('all');
   const [exerciseType, setExerciseType] = useState<ExerciseType>('mixed');
@@ -23,7 +28,8 @@ export function SessionModal({
 
   if (!isOpen) return null;
 
-  const categoryMeta = category !== 'all' ? getCategoryMeta(category) : null;
+  const categoryMeta = category !== 'all' ? getCategoryMeta(category, appLang) : null;
+  const studyLangInfo = SUPPORTED_LANGUAGES[studyLang] || SUPPORTED_LANGUAGES.en;
 
   const handleStart = () => {
     onStartSession({
@@ -31,6 +37,7 @@ export function SessionModal({
       difficulty,
       exerciseType,
       questionCount,
+      studyLanguage: studyLang,
     });
   };
 
@@ -43,33 +50,33 @@ export function SessionModal({
   }[] = [
     {
       type: 'mixed',
-      title: 'Modo Misto',
-      description: 'Alterna dinamicamente entre traduções, expressões e desafios.',
+      title: t('session.mixed', appLang),
+      description: t('session.mixedDesc', appLang),
       icon: Shuffle,
-      badge: 'Recomendado',
+      badge: '★',
     },
     {
       type: 'translation',
-      title: 'Escolha a tradução',
-      description: 'Identifique o significado correto em português com 4 opções.',
+      title: t('session.trans', appLang),
+      description: t('session.transDesc', appLang),
       icon: BookOpen,
     },
     {
       type: 'fill_expression',
-      title: 'Complete a expressão',
-      description: 'Preencha a lacuna em expressões cotidianas e gírias.',
+      title: t('session.fill', appLang),
+      description: t('session.fillDesc', appLang),
       icon: HelpCircle,
     },
     {
       type: 'match_pairs',
-      title: 'Combine palavras',
-      description: 'Conecte termos em inglês às suas traduções correspondentes.',
+      title: t('session.pairs', appLang),
+      description: t('session.pairsDesc', appLang),
       icon: Layers,
     },
     {
       type: 'synonym_antonym',
-      title: 'Sinônimo ou antônimo',
-      description: 'Identifique termos de significado similar ou oposto.',
+      title: t('session.synAnt', appLang),
+      description: t('session.synAntDesc', appLang),
       icon: Zap,
     },
   ];
@@ -97,16 +104,20 @@ export function SessionModal({
           {/* Header */}
           <div className="mb-6">
             <div className="flex items-center gap-2.5 mb-2">
-              <span className="px-3 py-1 rounded-full bg-[#F3F0FF] text-[#8B5CF6] font-bold text-xs">
-                {categoryMeta ? categoryMeta.name : 'Todas as Categorias'}
+              <span className="px-3 py-1 rounded-full bg-[#F3F0FF] text-[#7C3AED] font-bold text-xs">
+                {categoryMeta ? categoryMeta.name : t('learn.filterAll', appLang)}
               </span>
-              <span className="text-xs text-[#7E7C89]">Configurar Prática</span>
+              <span className="text-xs text-[#7E7C89] font-medium">
+                {studyLangInfo.flag} {studyLangInfo.nativeName}
+              </span>
             </div>
             <h2 className="text-2xl font-bold text-[#1F1F23] font-display">
-              {categoryMeta ? `Praticar ${categoryMeta.name}` : 'Sessão de Vocabulário'}
+              {categoryMeta
+                ? `${t('learn.practice', appLang)}: ${categoryMeta.name}`
+                : t('learn.quickSession', appLang)}
             </h2>
             <p className="text-xs sm:text-sm text-[#7E7C89] mt-1">
-              Personalize o nível e o formato para acelerar sua memorização.
+              {t('learn.subtitle', appLang)}
             </p>
           </div>
 
@@ -114,14 +125,14 @@ export function SessionModal({
             {/* 1. Dificuldade */}
             <div>
               <label className="block text-xs font-bold text-[#7E7C89] uppercase tracking-wider mb-2.5">
-                1. Dificuldade
+                {t('session.diffTitle', appLang)}
               </label>
               <div className="grid grid-cols-4 gap-2">
                 {[
-                  { id: 'all', label: 'Todas' },
-                  { id: 'basic', label: 'Básico' },
-                  { id: 'intermediate', label: 'Médio' },
-                  { id: 'advanced', label: 'Avançado' },
+                  { id: 'all', label: t('session.diffAll', appLang) },
+                  { id: 'basic', label: t('session.diffBasic', appLang) },
+                  { id: 'intermediate', label: t('session.diffMedium', appLang) },
+                  { id: 'advanced', label: t('session.diffAdvanced', appLang) },
                 ].map((item) => (
                   <button
                     key={item.id}
@@ -129,8 +140,8 @@ export function SessionModal({
                     onClick={() => setDifficulty(item.id as DifficultyLevel | 'all')}
                     className={`py-2.5 px-2 rounded-xl text-xs font-bold transition-all text-center border cursor-pointer ${
                       difficulty === item.id
-                        ? 'bg-[#8B5CF6] text-white border-[#8B5CF6] shadow-sm'
-                        : 'bg-[#F8F7FA] text-[#7E7C89] border-[#ECEBF1] hover:bg-[#F3F0FF] hover:text-[#8B5CF6]'
+                        ? 'bg-[#7C3AED] text-white border-[#7C3AED] shadow-xs'
+                        : 'bg-[#F8F7FA] text-[#7E7C89] border-[#ECEBF1] hover:bg-[#F3F0FF] hover:text-[#7C3AED]'
                     }`}
                   >
                     {item.label}
@@ -142,7 +153,7 @@ export function SessionModal({
             {/* 2. Tipo de exercício */}
             <div>
               <label className="block text-xs font-bold text-[#7E7C89] uppercase tracking-wider mb-2.5">
-                2. Tipo de Exercício
+                {t('session.typeTitle', appLang)}
               </label>
               <div className="space-y-2">
                 {exerciseOptions.map((opt) => {
@@ -155,13 +166,13 @@ export function SessionModal({
                       onClick={() => setExerciseType(opt.type)}
                       className={`w-full flex items-start gap-3 p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
                         isSelected
-                          ? 'bg-[#F3F0FF] border-[#8B5CF6]'
+                          ? 'bg-[#F3F0FF] border-[#7C3AED]'
                           : 'bg-white border-[#ECEBF1] hover:bg-[#F8F7FA]'
                       }`}
                     >
                       <div
                         className={`p-2 rounded-xl shrink-0 mt-0.5 ${
-                          isSelected ? 'bg-[#8B5CF6] text-white' : 'bg-[#F8F7FA] text-[#7E7C89]'
+                          isSelected ? 'bg-[#7C3AED] text-white' : 'bg-[#F8F7FA] text-[#7E7C89]'
                         }`}
                       >
                         <Icon className="w-4 h-4" />
@@ -176,7 +187,7 @@ export function SessionModal({
                             {opt.title}
                           </span>
                           {opt.badge && (
-                            <span className="px-2 py-0.5 bg-[#8B5CF6] text-white text-[10px] font-bold rounded-full">
+                            <span className="px-2 py-0.5 bg-[#7C3AED] text-white text-[10px] font-bold rounded-full">
                               {opt.badge}
                             </span>
                           )}
@@ -185,7 +196,7 @@ export function SessionModal({
                       </div>
                       <div className="mt-1">
                         {isSelected ? (
-                          <CheckCircle2 className="w-5 h-5 text-[#8B5CF6]" />
+                          <CheckCircle2 className="w-5 h-5 text-[#7C3AED]" />
                         ) : (
                           <div className="w-4 h-4 rounded-full border-2 border-[#ECEBF1]" />
                         )}
@@ -199,7 +210,7 @@ export function SessionModal({
             {/* 3. Quantidade de questões */}
             <div>
               <label className="block text-xs font-bold text-[#7E7C89] uppercase tracking-wider mb-2.5">
-                3. Quantidade de Perguntas
+                {t('session.questionsCountTitle', appLang)}
               </label>
               <div className="grid grid-cols-3 gap-2">
                 {[5, 10, 15].map((count) => (
@@ -209,11 +220,11 @@ export function SessionModal({
                     onClick={() => setQuestionCount(count)}
                     className={`py-2.5 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                       questionCount === count
-                        ? 'bg-[#8B5CF6] text-white border-[#8B5CF6] shadow-sm'
-                        : 'bg-[#F8F7FA] text-[#7E7C89] border-[#ECEBF1] hover:bg-[#F3F0FF] hover:text-[#8B5CF6]'
+                        ? 'bg-[#7C3AED] text-white border-[#7C3AED] shadow-xs'
+                        : 'bg-[#F8F7FA] text-[#7E7C89] border-[#ECEBF1] hover:bg-[#F3F0FF] hover:text-[#7C3AED]'
                     }`}
                   >
-                    {count} perguntas
+                    {count} {t('session.questionsLabel', appLang)}
                   </button>
                 ))}
               </div>
@@ -225,10 +236,10 @@ export function SessionModal({
                 type="button"
                 onClick={handleStart}
                 id="start-session-btn"
-                className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-bold text-base shadow-lg shadow-purple-200/50 active:scale-[0.98] transition-all cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-2xl bg-[#7C3AED] hover:bg-[#6D28D9] text-white font-bold text-base shadow-lg shadow-purple-200/50 active:scale-[0.98] transition-all cursor-pointer"
               >
                 <Play className="w-5 h-5 fill-current" />
-                <span>Começar Sessão</span>
+                <span>{t('session.startBtn', appLang)}</span>
               </button>
             </div>
           </div>

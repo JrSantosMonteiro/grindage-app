@@ -1,7 +1,7 @@
 import React from 'react';
 import { Volume2, CheckCircle, XCircle, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Question } from '../../types';
+import { Question, StudyLanguage } from '../../types';
 import { audioService } from '../../utils/audio';
 
 interface QuestionSynonymAntonymProps {
@@ -10,6 +10,7 @@ interface QuestionSynonymAntonymProps {
   isAnswered: boolean;
   isCorrect: boolean;
   onSelectOption: (option: string) => void;
+  studyLang?: StudyLanguage;
 }
 
 export function QuestionSynonymAntonym({
@@ -18,12 +19,13 @@ export function QuestionSynonymAntonym({
   isAnswered,
   isCorrect,
   onSelectOption,
+  studyLang = 'en',
 }: QuestionSynonymAntonymProps) {
   const isSynonym = question.questionSubtype === 'synonym';
 
   const handleSpeak = (e: React.MouseEvent) => {
     e.stopPropagation();
-    audioService.speak(question.vocabItem.word);
+    audioService.speak(question.vocabItem.word, studyLang);
   };
 
   return (

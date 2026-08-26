@@ -1,21 +1,28 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, Layers, Volume2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { Question } from '../../types';
+import { AppLanguage, Question, StudyLanguage } from '../../types';
 import { audioService } from '../../utils/audio';
+import { SUPPORTED_LANGUAGES } from '../../i18n/translations';
 
 interface QuestionMatchPairsProps {
   question: Question;
   isAnswered: boolean;
   onComplete: (success: boolean) => void;
+  studyLang?: StudyLanguage;
+  appLang?: AppLanguage;
 }
 
 export function QuestionMatchPairs({
   question,
   isAnswered,
   onComplete,
+  studyLang = 'en',
+  appLang = 'pt',
 }: QuestionMatchPairsProps) {
   const pairs = question.pairs || [];
+  const studyInfo = SUPPORTED_LANGUAGES[studyLang] || SUPPORTED_LANGUAGES.en;
+  const appInfo = SUPPORTED_LANGUAGES[appLang] || SUPPORTED_LANGUAGES.pt;
 
   // Shuffle right sides once
   const [leftItems] = useState(() => pairs.map((p) => ({ id: p.id, text: p.left })));
@@ -40,9 +47,9 @@ export function QuestionMatchPairs({
         setSelectedLeft(null);
         setSelectedRight(null);
 
-        // Speak the English word matched
+        // Speak the word matched
         const pair = pairs.find((p) => p.id === selectedLeft);
-        if (pair) audioService.speak(pair.left);
+        if (pair) audioService.speak(pair.left, studyLang);
 
         if (nextMatched.length === pairs.length) {
           setTimeout(() => {
@@ -60,16 +67,16 @@ export function QuestionMatchPairs({
         }, 700);
       }
     }
-  }, [selectedLeft, selectedRight, matchedIds, pairs, onComplete]);
+  }, [selectedLeft, selectedRight, matchedIds, pairs, onComplete, studyLang]);
 
   return (
     <div className="w-full max-w-xl mx-auto flex flex-col items-center">
       <div className="text-center mb-6">
-        <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold uppercase tracking-wider mb-2">
+        <span className="inline-block px-3 py-1 rounded-full bg-purple-100 text-purple-800 text-xs font-bold uppercase tracking-wider mb-2">
           Combine os Pares
         </span>
         <h3 className="text-sm font-bold text-slate-800">
-          Toque no termo em inglês e na sua tradução em português
+          Toque no termo em {studyInfo.name} e no seu significado
         </h3>
         <p className="text-xs text-slate-500 mt-0.5">
           {matchedIds.length} de {pairs.length} pares conectados
@@ -77,10 +84,10 @@ export function QuestionMatchPairs({
       </div>
 
       <div className="w-full grid grid-cols-2 gap-3 sm:gap-4" id="match-pairs-board">
-        {/* Left Column (English words) */}
+        {/* Left Column (Study language words) */}
         <div className="space-y-2.5">
           <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
-            Inglês
+            {studyInfo.flag} {studyInfo.name}
           </div>
           {leftItems.map((item) => {
             const isMatched = matchedIds.includes(item.id);
@@ -95,18 +102,18 @@ export function QuestionMatchPairs({
                 onClick={() => {
                   if (!isMatched) {
                     setSelectedLeft(item.id);
-                    audioService.speak(item.text);
+                    audioService.speak(item.text, studyLang);
                   }
                 }}
                 whileTap={{ scale: isMatched ? 1 : 0.97 }}
-                className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border-2 font-bold text-sm sm:text-base transition-all ${
+                className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border-2 font-bold text-sm sm:text-base transition-all cursor-pointer ${
                   isMatched
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-400 opacity-60 line-through'
                     : isError
                     ? 'bg-rose-50 text-rose-800 border-rose-500 animate-shake'
                     : isSelected
-                    ? 'bg-purple-100 text-violet-900 border-violet-600 ring-2 ring-violet-500/20 shadow-sm'
-                    : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300 hover:bg-purple-50/30'
+                    ? 'bg-purple-100 text-purple-900 border-[#7C3AED] ring-2 ring-purple-500/20 shadow-xs'
+                    : 'bg-white text-slate-800 border-slate-200 hover:border-purple-300 hover:bg-purple-50/30'
                 }`}
               >
                 <span className="truncate">{item.text}</span>
@@ -116,10 +123,10 @@ export function QuestionMatchPairs({
           })}
         </div>
 
-        {/* Right Column (Portuguese translations) */}
+        {/* Right Column (Target/App language translations) */}
         <div className="space-y-2.5">
           <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">
-            Português
+            {appInfo.flag} {appInfo.name}
           </div>
           {rightItems.map((item) => {
             const isMatched = matchedIds.includes(item.id);
@@ -135,14 +142,14 @@ export function QuestionMatchPairs({
                   if (!isMatched) setSelectedRight(item.id);
                 }}
                 whileTap={{ scale: isMatched ? 1 : 0.97 }}
-                className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border-2 font-semibold text-xs sm:text-sm transition-all ${
+                className={`w-full flex items-center justify-between p-3.5 sm:p-4 rounded-2xl border-2 font-semibold text-xs sm:text-sm transition-all cursor-pointer ${
                   isMatched
                     ? 'bg-emerald-50 text-emerald-800 border-emerald-400 opacity-60'
                     : isError
                     ? 'bg-rose-50 text-rose-800 border-rose-500'
                     : isSelected
-                    ? 'bg-purple-100 text-violet-900 border-violet-600 ring-2 ring-violet-500/20 shadow-sm'
-                    : 'bg-white text-slate-800 border-slate-200 hover:border-violet-300 hover:bg-purple-50/30'
+                    ? 'bg-purple-100 text-purple-900 border-[#7C3AED] ring-2 ring-purple-500/20 shadow-xs'
+                    : 'bg-white text-slate-800 border-slate-200 hover:border-purple-300 hover:bg-purple-50/30'
                 }`}
               >
                 <span className="truncate">{item.text}</span>
