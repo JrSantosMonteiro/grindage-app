@@ -52,10 +52,10 @@ export function SessionResult({
         Sessão Concluída!
       </h2>
       <p className="text-sm text-[#7E7C89] mt-1 max-w-sm">
-        Excelente trabalho! Você expandiu seu vocabulário e ganhou experiência.
+        Excelente trabalho! Você expandiu seu vocabulário e fortaleceu sua retenção.
       </p>
 
-      {/* Main XP Badge */}
+      {/* Main Success Badge */}
       <motion.div
         initial={{ y: 10, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -67,9 +67,9 @@ export function SessionResult({
         </div>
         <div className="text-left">
           <div className="text-xs font-semibold text-purple-100 uppercase tracking-wider">
-            Total de XP Ganho
+            Palavras Praticadas
           </div>
-          <div className="text-2xl font-bold font-display">+{stats.xpEarned} XP</div>
+          <div className="text-2xl font-bold font-display">{stats.wordsPracticed.length} Termos Fixados</div>
         </div>
       </motion.div>
 
@@ -107,7 +107,7 @@ export function SessionResult({
           </div>
           {stats.unlockedAchievements.map((ach) => (
             <div key={ach.id} className="text-xs text-amber-800 font-semibold">
-              🏆 {ach.title} (+{ach.xpReward} XP)
+              🏆 {ach.title}
             </div>
           ))}
         </motion.div>

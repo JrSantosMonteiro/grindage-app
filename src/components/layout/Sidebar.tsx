@@ -11,7 +11,6 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { NavigationTab, UserProfile } from '../../types';
-import { getLevelData } from '../../services/storage';
 
 interface SidebarProps {
   currentTab: NavigationTab;
@@ -30,8 +29,6 @@ export function Sidebar({
   onToggleSound,
   soundEnabled,
 }: SidebarProps) {
-  const levelData = getLevelData(profile.xp);
-
   const navItems: { tab: NavigationTab; label: string; icon: typeof Home }[] = [
     { tab: 'dashboard', label: 'Início', icon: Home },
     { tab: 'learn', label: 'Aprender', icon: BookOpen },
@@ -116,7 +113,7 @@ export function Sidebar({
                   {profile.name}
                 </span>
                 <span className="text-xs text-[#8B5CF6] font-semibold">
-                  Nível {levelData.level} • {profile.xp} XP
+                  Nível {profile.level} • {profile.levelTitle}
                 </span>
               </div>
             </button>

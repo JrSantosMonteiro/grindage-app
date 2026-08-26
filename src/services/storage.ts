@@ -17,45 +17,45 @@ const STORAGE_KEYS = {
 };
 
 export const LEVEL_THRESHOLDS = [
-  { level: 1, xp: 0, title: 'Iniciante Curioso' },
-  { level: 2, xp: 100, title: 'Explorador de Palavras' },
-  { level: 3, xp: 250, title: 'Caçador de Expressões' },
-  { level: 4, xp: 450, title: 'Mestre do Vocabulário' },
-  { level: 5, xp: 700, title: 'Guardião das Gírias' },
-  { level: 6, xp: 1050, title: 'Orador Fluente' },
-  { level: 7, xp: 1500, title: 'Lenda Linguística' },
+  { level: 1, wordsRequired: 0, title: 'Iniciante Curioso' },
+  { level: 2, wordsRequired: 10, title: 'Explorador de Palavras' },
+  { level: 3, wordsRequired: 25, title: 'Caçador de Expressões' },
+  { level: 4, wordsRequired: 45, title: 'Mestre do Vocabulário' },
+  { level: 5, wordsRequired: 70, title: 'Guardião das Gírias' },
+  { level: 6, wordsRequired: 100, title: 'Orador Fluente' },
+  { level: 7, wordsRequired: 150, title: 'Lenda Linguística' },
 ];
 
-export function getLevelData(totalXp: number): {
+export function getLevelData(learnedWordsCount: number): {
   level: number;
   title: string;
-  currentLevelXp: number;
-  nextLevelXp: number;
+  currentWords: number;
+  nextLevelWords: number;
   progressPercent: number;
 } {
   let currentTier = LEVEL_THRESHOLDS[0];
   let nextTier = LEVEL_THRESHOLDS[1];
 
   for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
-    if (totalXp >= LEVEL_THRESHOLDS[i].xp) {
+    if (learnedWordsCount >= LEVEL_THRESHOLDS[i].wordsRequired) {
       currentTier = LEVEL_THRESHOLDS[i];
       nextTier = LEVEL_THRESHOLDS[i + 1] || {
         level: currentTier.level + 1,
-        xp: currentTier.xp + 500,
+        wordsRequired: currentTier.wordsRequired + 50,
         title: 'Mestre Supremo',
       };
     }
   }
 
-  const range = nextTier.xp - currentTier.xp;
-  const earnedInRange = totalXp - currentTier.xp;
-  const progressPercent = Math.min(100, Math.max(0, Math.round((earnedInRange / range) * 100)));
+  const range = nextTier.wordsRequired - currentTier.wordsRequired;
+  const earnedInRange = learnedWordsCount - currentTier.wordsRequired;
+  const progressPercent = Math.min(100, Math.max(0, Math.round((earnedInRange / Math.max(1, range)) * 100)));
 
   return {
     level: currentTier.level,
     title: currentTier.title,
-    currentLevelXp: totalXp,
-    nextLevelXp: nextTier.xp,
+    currentWords: learnedWordsCount,
+    nextLevelWords: nextTier.wordsRequired,
     progressPercent,
   };
 }
@@ -77,7 +77,6 @@ const DEFAULT_PROFILE: UserProfile = {
   avatar: '🦊',
   level: 3,
   levelTitle: 'Caçador de Expressões',
-  xp: 340,
   streakDays: 7,
   bestStreak: 12,
   dailyGoal: 20,
@@ -258,7 +257,6 @@ export class StorageService {
 
   public static recordSessionResult(
     result: {
-      xpEarned: number;
       correctCount: number;
       totalCount: number;
       comboMax: number;
@@ -277,32 +275,13 @@ export class StorageService {
     const todayStr = new Date().toISOString().split('T')[0];
     const oldLevel = profile.level;
 
-    // Update XP & stats
-    const totalXp = profile.xp + result.xpEarned;
-    const levelInfo = getLevelData(totalXp);
-
     // Update streak dates
     const studiedDates = [...profile.studiedDates];
     if (!studiedDates.includes(todayStr)) {
       studiedDates.push(todayStr);
     }
 
-    const updatedProfile: UserProfile = {
-      ...profile,
-      xp: totalXp,
-      level: levelInfo.level,
-      levelTitle: levelInfo.title,
-      dailyWordsProgress: profile.dailyWordsProgress + result.practicedWordIds.length,
-      lastActiveDate: todayStr,
-      studiedDates,
-      completedSessionsCount: profile.completedSessionsCount + 1,
-      totalCorrectAnswers: profile.totalCorrectAnswers + result.correctCount,
-      totalAttemptedAnswers: profile.totalAttemptedAnswers + result.totalCount,
-    };
-
-    this.saveProfile(updatedProfile);
-
-    // Update words practiced
+    // Update words practiced first so we can count learned words for level
     result.practicedWordIds.forEach((wordId) => {
       const current = statuses[wordId] || {
         wordId,
@@ -328,6 +307,25 @@ export class StorageService {
     });
 
     this.saveWordStatuses(statuses);
+
+    const learnedWordsCount = Object.values(statuses).filter(
+      (s) => s.status === 'learning' || s.status === 'known' || s.status === 'mastered'
+    ).length;
+    const levelInfo = getLevelData(learnedWordsCount);
+
+    const updatedProfile: UserProfile = {
+      ...profile,
+      level: levelInfo.level,
+      levelTitle: levelInfo.title,
+      dailyWordsProgress: profile.dailyWordsProgress + result.practicedWordIds.length,
+      lastActiveDate: todayStr,
+      studiedDates,
+      completedSessionsCount: profile.completedSessionsCount + 1,
+      totalCorrectAnswers: profile.totalCorrectAnswers + result.correctCount,
+      totalAttemptedAnswers: profile.totalAttemptedAnswers + result.totalCount,
+    };
+
+    this.saveProfile(updatedProfile);
 
     // Evaluate Achievements
     const newlyUnlocked: Achievement[] = [];

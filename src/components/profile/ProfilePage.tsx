@@ -39,16 +39,16 @@ export function ProfilePage({
   soundEnabled,
   onToggleSound,
 }: ProfilePageProps) {
-  const levelData = getLevelData(profile.xp);
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState(profile.name);
-  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
-
   const statusesList = Object.values(wordStatuses);
   const wordsLearned = statusesList.filter(
     (s) => s.status === 'learning' || s.status === 'known' || s.status === 'mastered'
   ).length;
   const wordsMastered = statusesList.filter((s) => s.status === 'mastered').length;
+  const levelData = getLevelData(wordsLearned);
+
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState(profile.name);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const accuracy =
     profile.totalAttemptedAnswers > 0
       ? Math.round((profile.totalCorrectAnswers / profile.totalAttemptedAnswers) * 100)
@@ -87,7 +87,7 @@ export function ProfilePage({
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12" id="profile-view">
+    <div className="space-y-6 w-full pb-12" id="profile-view">
       {/* 1. Profile Header Card */}
       <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-xs relative overflow-hidden">
         <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
@@ -141,7 +141,7 @@ export function ProfilePage({
 
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
               <span className="px-3.5 py-1.5 rounded-full bg-[#F3F0FF] text-[#8B5CF6] text-xs font-bold">
-                Nível {levelData.level} • {levelData.title}
+                Nível {profile.level} • {profile.levelTitle}
               </span>
               <span className="px-3.5 py-1.5 rounded-full bg-orange-50 text-orange-700 border border-orange-100 text-xs font-bold flex items-center gap-1.5">
                 <Flame className="w-3.5 h-3.5 fill-current text-orange-500" />
@@ -149,11 +149,11 @@ export function ProfilePage({
               </span>
             </div>
 
-            {/* Level XP Bar */}
+            {/* Level Vocabulary Progress Bar */}
             <div className="mt-4 max-w-md">
               <div className="flex justify-between text-xs font-bold text-[#7E7C89] mb-1.5">
-                <span>Experiência Total</span>
-                <span className="text-[#8B5CF6] font-bold">{profile.xp} / {levelData.nextLevelXp} XP</span>
+                <span>Progresso para o Próximo Nível</span>
+                <span className="text-[#8B5CF6] font-bold">{wordsLearned} / {levelData.nextLevelWords} palavras</span>
               </div>
               <div className="w-full h-2 bg-[#F3F0FF] rounded-full overflow-hidden">
                 <div

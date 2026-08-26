@@ -48,7 +48,6 @@ export interface UserProfile {
   avatar: string;
   level: number;
   levelTitle: string;
-  xp: number;
   streakDays: number;
   bestStreak: number;
   dailyGoal: number;
@@ -79,7 +78,6 @@ export interface Achievement {
   progress: number;
   maxProgress: number;
   unlockedAt?: string;
-  xpReward: number;
 }
 
 export type ExerciseType = 'translation' | 'fill_expression' | 'match_pairs' | 'synonym_antonym' | 'mixed';
@@ -114,7 +112,6 @@ export interface SessionConfig {
 export interface SessionResultStats {
   totalQuestions: number;
   correctAnswers: number;
-  xpEarned: number;
   maxCombo: number;
   wordsPracticed: VocabularyItem[];
   unlockedAchievements: Achievement[];

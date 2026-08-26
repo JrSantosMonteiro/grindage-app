@@ -31,7 +31,7 @@ export function GamesPage({ onStartSession }: GamesPageProps) {
       color: 'from-violet-600 to-purple-600',
       difficulty: 'all' as const,
       exerciseType: 'mixed' as const,
-      xpBonus: '+20 XP Bônus ao Final',
+      highlight: 'Desafio com Todos os Formatos',
     },
     {
       id: 'translation',
@@ -43,7 +43,7 @@ export function GamesPage({ onStartSession }: GamesPageProps) {
       color: 'from-indigo-600 to-violet-600',
       difficulty: 'all' as const,
       exerciseType: 'translation' as const,
-      xpBonus: '+10 XP por Resposta',
+      highlight: 'Áudio Nativo & Reconhecimento Rápido',
     },
     {
       id: 'expressions',
@@ -55,7 +55,7 @@ export function GamesPage({ onStartSession }: GamesPageProps) {
       color: 'from-purple-600 to-fuchsia-600',
       difficulty: 'all' as const,
       exerciseType: 'fill_expression' as const,
-      xpBonus: '+15 XP por Acerto',
+      highlight: 'Fixação de Gírias em Contexto',
     },
     {
       id: 'pairs',
@@ -67,7 +67,7 @@ export function GamesPage({ onStartSession }: GamesPageProps) {
       color: 'from-violet-600 to-purple-800',
       difficulty: 'all' as const,
       exerciseType: 'match_pairs' as const,
-      xpBonus: '+15 XP por Rodada',
+      highlight: 'Agilidade de Associação',
     },
     {
       id: 'synonyms',
@@ -79,7 +79,7 @@ export function GamesPage({ onStartSession }: GamesPageProps) {
       color: 'from-amber-600 to-violet-600',
       difficulty: 'intermediate' as const,
       exerciseType: 'synonym_antonym' as const,
-      xpBonus: '+10 XP + Combo',
+      highlight: 'Sinônimos & Antônimos Avançados',
     },
   ];
 
@@ -93,7 +93,7 @@ export function GamesPage({ onStartSession }: GamesPageProps) {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12" id="games-view">
+    <div className="space-y-6 w-full pb-12" id="games-view">
       {/* Header Banner */}
       <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
@@ -105,7 +105,7 @@ export function GamesPage({ onStartSession }: GamesPageProps) {
           </h2>
           <p className="text-xs sm:text-sm text-[#7E7C89] mt-1 max-w-xl">
             Aprenda brincando através de formatos dinâmicos projetados para fixação sem esforço.
-            Ganhe XP, acumule sequências de acertos e suba de nível!
+            Acumule sequências de acertos, domine palavras e evolua seu vocabulário!
           </p>
         </div>
 
@@ -148,8 +148,8 @@ export function GamesPage({ onStartSession }: GamesPageProps) {
                 </p>
 
                 <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-[#8B5CF6] bg-[#F3F0FF] px-3 py-1.5 rounded-xl w-fit border border-purple-100">
-                  <Flame className="w-4 h-4 text-orange-500" />
-                  <span>{game.xpBonus}</span>
+                  <Sparkles className="w-4 h-4 text-[#8B5CF6]" />
+                  <span>{game.highlight}</span>
                 </div>
               </div>
 

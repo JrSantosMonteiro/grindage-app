@@ -10,7 +10,6 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     progress: 1,
     maxProgress: 1,
     unlockedAt: '2026-08-20T10:00:00Z',
-    xpReward: 50,
   },
   {
     id: 'streak_week',
@@ -21,7 +20,6 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     progress: 7,
     maxProgress: 7,
     unlockedAt: '2026-08-26T08:30:00Z',
-    xpReward: 150,
   },
   {
     id: 'combo_ten',
@@ -31,7 +29,6 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     unlocked: false,
     progress: 6,
     maxProgress: 10,
-    xpReward: 100,
   },
   {
     id: 'words_fifty',
@@ -41,7 +38,6 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     unlocked: false,
     progress: 38,
     maxProgress: 50,
-    xpReward: 200,
   },
   {
     id: 'words_hundred',
@@ -51,7 +47,6 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     unlocked: false,
     progress: 38,
     maxProgress: 100,
-    xpReward: 500,
   },
   {
     id: 'slang_master',
@@ -61,7 +56,6 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     unlocked: false,
     progress: 2,
     maxProgress: 5,
-    xpReward: 120,
   },
   {
     id: 'favorite_collector',
@@ -71,7 +65,6 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     unlocked: false,
     progress: 4,
     maxProgress: 10,
-    xpReward: 75,
   },
   {
     id: 'master_five',
@@ -81,6 +74,5 @@ export const INITIAL_ACHIEVEMENTS: Achievement[] = [
     unlocked: false,
     progress: 9,
     maxProgress: 15,
-    xpReward: 250,
   },
 ];

@@ -30,7 +30,6 @@ export function LearningSession({
   const [isCorrect, setIsCorrect] = useState(false);
   const [currentCombo, setCurrentCombo] = useState(0);
   const [maxCombo, setMaxCombo] = useState(0);
-  const [xpEarned, setXpEarned] = useState(0);
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [practicedVocab, setPracticedVocab] = useState<VocabularyItem[]>([]);
   const [isCompleted, setIsCompleted] = useState(false);
@@ -56,10 +55,6 @@ export function LearningSession({
       setCurrentCombo(newCombo);
       setMaxCombo((prev) => Math.max(prev, newCombo));
       setCorrectAnswersCount((prev) => prev + 1);
-
-      // Base XP 10 + Combo Bonus 5
-      const earned = 10 + (newCombo > 1 ? 5 : 0);
-      setXpEarned((prev) => prev + earned);
 
       audioService.playCorrect();
       if (newCombo >= 3) {
@@ -90,9 +85,6 @@ export function LearningSession({
       setCurrentCombo(newCombo);
       setMaxCombo((prev) => Math.max(prev, newCombo));
       setCorrectAnswersCount((prev) => prev + 1);
-
-      const earned = 15 + (newCombo > 1 ? 5 : 0);
-      setXpEarned((prev) => prev + earned);
     }
   };
 
@@ -105,17 +97,12 @@ export function LearningSession({
       setIsCorrect(false);
     } else {
       // Session Completed!
-      // Add completion bonus (+20 XP)
-      const finalXp = xpEarned + 20;
-      setXpEarned(finalXp);
-
       const practicedIds = practicedVocab.map((v) => v.id);
       if (currentQuestion && !practicedIds.includes(currentQuestion.vocabItem.id)) {
         practicedIds.push(currentQuestion.vocabItem.id);
       }
 
       const outcome = StorageService.recordSessionResult({
-        xpEarned: finalXp,
         correctCount: correctAnswersCount + (isCorrect ? 1 : 0),
         totalCount: questions.length,
         comboMax: Math.max(maxCombo, currentCombo),
@@ -125,8 +112,7 @@ export function LearningSession({
 
       const stats: SessionResultStats = {
         totalQuestions: questions.length,
-        correctAnswers: correctAnswersCount,
-        xpEarned: finalXp,
+        correctAnswers: correctAnswersCount + (isCorrect ? 1 : 0),
         maxCombo: Math.max(maxCombo, currentCombo),
         wordsPracticed: practicedVocab,
         unlockedAchievements: outcome.unlockedAchievements,
@@ -145,7 +131,6 @@ export function LearningSession({
     setIsCorrect(false);
     setCurrentCombo(0);
     setMaxCombo(0);
-    setXpEarned(0);
     setCorrectAnswersCount(0);
     setPracticedVocab([]);
     setIsCompleted(false);
@@ -200,25 +185,23 @@ export function LearningSession({
           </div>
         </div>
 
-        {/* Right Indicators: Combo & XP */}
+        {/* Right Indicators: Combo Streak */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Combo Streak */}
-          {currentCombo > 1 && (
+          {currentCombo > 1 ? (
             <motion.div
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               className="flex items-center gap-1 px-3 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-100 font-bold text-xs"
             >
               <Zap className="w-3.5 h-3.5 fill-current text-orange-500" />
-              <span>x{currentCombo}</span>
+              <span>x{currentCombo} combo</span>
             </motion.div>
+          ) : (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#F3F0FF] text-[#8B5CF6] border border-purple-100 font-bold text-xs">
+              <Sparkles className="w-3.5 h-3.5 text-[#8B5CF6]" />
+              <span>Praticando</span>
+            </div>
           )}
-
-          {/* Current XP */}
-          <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#F3F0FF] text-[#8B5CF6] font-bold text-xs sm:text-sm border border-purple-100">
-            <Sparkles className="w-4 h-4 text-[#8B5CF6] fill-current" />
-            <span>+{xpEarned} XP</span>
-          </div>
         </div>
       </header>
 

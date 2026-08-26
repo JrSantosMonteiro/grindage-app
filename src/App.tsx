@@ -4,7 +4,6 @@ import { StorageService } from './services/storage';
 import { audioService } from './utils/audio';
 import { Sidebar } from './components/layout/Sidebar';
 import { BottomNavigation } from './components/layout/BottomNavigation';
-import { TopHeader } from './components/layout/TopHeader';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { LearnPage } from './components/learn/LearnPage';
 import { GamesPage } from './components/games/GamesPage';
@@ -114,17 +113,8 @@ export default function App() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 md:pl-64">
-        {/* Top Header */}
-        <TopHeader
-          profile={profile}
-          onOpenStreakModal={() => setIsStreakModalOpen(true)}
-          onNavigateProfile={() => setActiveTab('profile')}
-          soundEnabled={soundEnabled}
-          onToggleSound={handleToggleSound}
-        />
-
         {/* Dynamic Page Views */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24 md:pb-12">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1500px] w-full mx-auto pb-24 md:pb-12">
           {activeTab === 'dashboard' && (
             <Dashboard
               profile={profile}

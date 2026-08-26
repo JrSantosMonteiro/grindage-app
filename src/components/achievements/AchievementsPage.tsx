@@ -23,7 +23,7 @@ export function AchievementsPage({ achievements, profile }: AchievementsPageProp
   const completionPercent = Math.round((unlockedCount / Math.max(1, totalCount)) * 100);
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12" id="achievements-view">
+    <div className="space-y-6 w-full pb-12" id="achievements-view">
       {/* Header Banner */}
       <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
@@ -34,7 +34,7 @@ export function AchievementsPage({ achievements, profile }: AchievementsPageProp
             Conquistas & Troféus
           </h2>
           <p className="text-xs sm:text-sm text-[#7E7C89] mt-1 max-w-xl">
-            Cumpra desafios e metas de vocabulário para desbloquear medalhas exclusivas e bônus de XP.
+            Cumpra desafios e metas de vocabulário para desbloquear medalhas e troféus exclusivos no seu perfil.
           </p>
         </div>
 
@@ -92,15 +92,11 @@ export function AchievementsPage({ achievements, profile }: AchievementsPageProp
                   >
                     {ach.title}
                   </h3>
-                  <span
-                    className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${
-                      ach.unlocked
-                        ? 'bg-amber-50 text-amber-800 border border-amber-200'
-                        : 'bg-[#ECEBF1] text-[#7E7C89]'
-                    }`}
-                  >
-                    +{ach.xpReward} XP
-                  </span>
+                  {ach.unlocked && (
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      Conquistado
+                    </span>
+                  )}
                 </div>
 
                 <p className="text-xs text-[#7E7C89] leading-relaxed">

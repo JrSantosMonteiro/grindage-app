@@ -109,7 +109,7 @@ export function VocabularyPage({
   }, [wordStatuses]);
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-12" id="vocabulary-view">
+    <div className="space-y-6 w-full pb-12" id="vocabulary-view">
       {/* Header Banner */}
       <div className="bg-white rounded-[32px] p-6 sm:p-8 border border-[#ECEBF1] shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
