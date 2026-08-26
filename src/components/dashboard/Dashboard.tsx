@@ -437,12 +437,6 @@ export function Dashboard({
                   </p>
                 </div>
               </div>
-              <button
-                onClick={onOpenStreakModal}
-                className="text-xs font-bold text-[#7C3AED] hover:underline cursor-pointer"
-              >
-                {t('dash.details', appLang)}
-              </button>
             </div>
 
             {/* Week days row */}
