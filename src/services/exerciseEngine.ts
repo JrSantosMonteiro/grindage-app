@@ -16,6 +16,25 @@ import {
   VocabularyItem,
 } from '../types';
 
+/**
+ * Formats a text so that all words start with a lowercase letter,
+ * EXCEPT at the beginning of a sentence/phrase where the initial letter is uppercase.
+ */
+export function formatChallengeText(text: string, isStartOfSentence: boolean = true): string {
+  if (!text) return text;
+  
+  if (!isStartOfSentence) {
+    return text.toLowerCase();
+  }
+
+  const lower = text.toLowerCase();
+
+  // Capitalize the first letter at the start of the string or after sentence-ending punctuation (. ! ?)
+  return lower.replace(/(^\s*|[.!?]\s+)([a-zà-ÿ])/gi, (match, prefix, char) => {
+    return prefix + char.toUpperCase();
+  });
+}
+
 function shuffle<T>(array: T[]): T[] {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -117,11 +136,11 @@ function createTranslationQuestion(
   allVocab: VocabularyItem[],
   appLang: AppLanguage
 ): Question {
-  const itemTrans = getWordTranslation(item, appLang);
+  const itemTrans = formatChallengeText(getWordTranslation(item, appLang), true);
   const distractors = allVocab
     .filter((v) => v.id !== item.id)
-    .map((v) => getWordTranslation(v, appLang))
-    .filter((t) => t !== itemTrans);
+    .map((v) => formatChallengeText(getWordTranslation(v, appLang), true))
+    .filter((t) => t.toLowerCase() !== itemTrans.toLowerCase());
 
   const shuffledDistractors = shuffle(Array.from(new Set(distractors))).slice(0, 3);
   const options = shuffle([itemTrans, ...shuffledDistractors]);
@@ -130,7 +149,7 @@ function createTranslationQuestion(
     id: `q-trans-${item.id}-${Math.random().toString(36).substring(2, 7)}`,
     exerciseType: 'translation',
     vocabItem: item,
-    prompt: item.word,
+    prompt: formatChallengeText(item.word, true),
     promptContext: item.situationTag ? `${item.situationTag}` : undefined,
     options,
     correctAnswer: itemTrans,
@@ -146,24 +165,42 @@ function createFillExpressionQuestion(
   const words = item.word.split(' ');
   let targetBlankWord = words[words.length - 1];
   let promptText = '';
+  let isBlankAtStart = false;
 
   if (words.length > 1) {
     const blankIndex = Math.floor(Math.random() * words.length);
     targetBlankWord = words[blankIndex];
-    promptText = words.map((w, idx) => (idx === blankIndex ? '____' : w)).join(' ');
+    isBlankAtStart = blankIndex === 0;
+    promptText = words
+      .map((w, idx) => {
+        if (idx === blankIndex) return '____';
+        return idx === 0 ? formatChallengeText(w, true) : w.toLowerCase();
+      })
+      .join(' ');
   } else {
     const regex = new RegExp(`\\b${item.word}\\b`, 'i');
     if (regex.test(item.example)) {
+      const matchIndex = item.example.search(regex);
+      isBlankAtStart = matchIndex === 0;
       promptText = item.example.replace(regex, '____');
       targetBlankWord = item.word;
     } else {
-      promptText = `${item.word.slice(0, 2)}____`;
+      promptText = `${item.word.slice(0, 2).toLowerCase()}____`;
+      isBlankAtStart = false;
       targetBlankWord = item.word;
     }
   }
 
+  // Ensure prompt sentence begins with uppercase if not starting with blank
+  if (!promptText.startsWith('____')) {
+    promptText = formatChallengeText(promptText, true);
+  }
+
+  const formattedTargetAnswer = formatChallengeText(targetBlankWord, isBlankAtStart);
+
   const distractorPool = allVocab
     .flatMap((v) => v.word.split(' '))
+    .map((w) => formatChallengeText(w, isBlankAtStart))
     .filter(
       (w) =>
         w.length > 2 &&
@@ -174,7 +211,7 @@ function createFillExpressionQuestion(
 
   const uniqueDistractors = Array.from(new Set(distractorPool));
   const chosenDistractors = shuffle(uniqueDistractors).slice(0, 3);
-  const options = shuffle([targetBlankWord, ...chosenDistractors]);
+  const options = shuffle([formattedTargetAnswer, ...chosenDistractors]);
 
   return {
     id: `q-fill-${item.id}-${Math.random().toString(36).substring(2, 7)}`,
@@ -183,7 +220,7 @@ function createFillExpressionQuestion(
     prompt: promptText,
     promptContext: `"${getWordTranslation(item, appLang)}"`,
     options,
-    correctAnswer: targetBlankWord,
+    correctAnswer: formattedTargetAnswer,
     explanation: `"${item.word}": ${getWordMeaning(item, appLang)} "${item.example}"`,
   };
 }
@@ -198,15 +235,15 @@ function createMatchPairsQuestion(
 
   const pairs: PairMatchItem[] = selected.map((v) => ({
     id: v.id,
-    left: v.word,
-    right: getWordTranslation(v, appLang),
+    left: formatChallengeText(v.word, true),
+    right: formatChallengeText(getWordTranslation(v, appLang), true),
   }));
 
   return {
     id: `q-pair-${item.id}-${Math.random().toString(36).substring(2, 7)}`,
     exerciseType: 'match_pairs',
     vocabItem: item,
-    prompt: item.word,
+    prompt: formatChallengeText(item.word, true),
     correctAnswer: 'all_paired',
     explanation: `${getWordMeaning(item, appLang)}`,
     pairs,
@@ -220,12 +257,15 @@ function createSynonymAntonymQuestion(
   appLang: AppLanguage
 ): Question {
   const isSynonym = subtype === 'synonym';
-  const targetAnswer = isSynonym
+  const rawTargetAnswer = isSynonym
     ? item.synonyms?.[0] || getWordTranslation(item, appLang)
     : item.antonyms?.[0] || getWordTranslation(item, appLang);
 
+  const targetAnswer = formatChallengeText(rawTargetAnswer, true);
+
   const distractors = allVocab
     .flatMap((v) => (isSynonym ? v.synonyms || [v.word] : v.antonyms || [v.word]))
+    .map((w) => formatChallengeText(w, true))
     .filter((w) => w.toLowerCase() !== targetAnswer.toLowerCase());
 
   const chosenDistractors = shuffle(Array.from(new Set(distractors))).slice(0, 3);
@@ -236,10 +276,10 @@ function createSynonymAntonymQuestion(
     exerciseType: 'synonym_antonym',
     questionSubtype: subtype,
     vocabItem: item,
-    prompt: `"${item.word}"`,
+    prompt: `"${formatChallengeText(item.word, true)}"`,
     promptContext: `${getWordTranslation(item, appLang)}`,
     options,
     correctAnswer: targetAnswer,
-    explanation: `"${item.word}" (${getWordTranslation(item, appLang)}): "${targetAnswer}". ${getWordMeaning(item, appLang)}`,
+    explanation: `"${formatChallengeText(item.word, true)}" (${formatChallengeText(getWordTranslation(item, appLang), true)}): "${targetAnswer}". ${getWordMeaning(item, appLang)}`,
   };
 }

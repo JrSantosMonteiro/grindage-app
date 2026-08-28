@@ -81,6 +81,7 @@ export function LearningSession({
 
   // Handle Pair match completion
   const handlePairMatchComplete = (success: boolean) => {
+    if (isAnswered) return;
     setIsAnswered(true);
     setIsCorrect(success);
     if (success) {
@@ -88,6 +89,11 @@ export function LearningSession({
       setCurrentCombo(newCombo);
       setMaxCombo((prev) => Math.max(prev, newCombo));
       setCorrectAnswersCount((prev) => prev + 1);
+    } else {
+      setCurrentCombo(0);
+    }
+    if (currentQuestion && !practicedVocab.find((v) => v.id === currentQuestion.vocabItem.id)) {
+      setPracticedVocab((prev) => [...prev, currentQuestion.vocabItem]);
     }
   };
 
@@ -100,13 +106,16 @@ export function LearningSession({
       setIsCorrect(false);
     } else {
       // Session Completed!
-      const practicedIds = practicedVocab.map((v) => v.id);
-      if (currentQuestion && !practicedIds.includes(currentQuestion.vocabItem.id)) {
-        practicedIds.push(currentQuestion.vocabItem.id);
+      const finalPracticedVocab = [...practicedVocab];
+      if (currentQuestion && !finalPracticedVocab.some((v) => v.id === currentQuestion.vocabItem.id)) {
+        finalPracticedVocab.push(currentQuestion.vocabItem);
       }
+      const practicedIds = finalPracticedVocab.map((v) => v.id);
+
+      const finalCorrectCount = Math.min(questions.length, correctAnswersCount);
 
       const outcome = StorageService.recordSessionResult({
-        correctCount: correctAnswersCount + (isCorrect ? 1 : 0),
+        correctCount: finalCorrectCount,
         totalCount: questions.length,
         comboMax: Math.max(maxCombo, currentCombo),
         practicedWordIds: practicedIds,
@@ -115,9 +124,9 @@ export function LearningSession({
 
       const stats: SessionResultStats = {
         totalQuestions: questions.length,
-        correctAnswers: correctAnswersCount + (isCorrect ? 1 : 0),
+        correctAnswers: finalCorrectCount,
         maxCombo: Math.max(maxCombo, currentCombo),
-        wordsPracticed: practicedVocab,
+        wordsPracticed: finalPracticedVocab,
         unlockedAchievements: outcome.unlockedAchievements,
       };
 

@@ -71,12 +71,6 @@ export function QuestionFillExpression({
         <div className="relative p-6 sm:p-8 bg-white rounded-3xl border border-purple-100 shadow-sm flex flex-col items-center">
           {renderPromptWithBlank()}
 
-          {question.promptContext && (
-            <div className="text-xs text-purple-700 font-semibold mt-3 px-3 py-1 bg-purple-50 rounded-full">
-              {question.promptContext}
-            </div>
-          )}
-
           <button
             type="button"
             onClick={handleSpeak}

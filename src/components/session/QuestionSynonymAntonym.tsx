@@ -59,12 +59,6 @@ export function QuestionSynonymAntonym({
             <Volume2 className="w-4 h-4" />
           </button>
         </div>
-
-        {question.promptContext && (
-          <p className="text-xs text-slate-400 mt-2">
-            {question.promptContext}
-          </p>
-        )}
       </div>
 
       <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3" id="synonym-antonym-options">

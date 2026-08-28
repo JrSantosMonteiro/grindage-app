@@ -64,12 +64,6 @@ export function QuestionTranslation({
             {question.vocabItem.phonetic}
           </div>
         )}
-
-        {question.promptContext && (
-          <p className="text-xs text-slate-400 mt-2 italic">
-            {question.promptContext}
-          </p>
-        )}
       </div>
 
       {/* 4 Options Grid */}

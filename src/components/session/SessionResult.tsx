@@ -21,7 +21,7 @@ export function SessionResult({
   onGoVocabulary,
   appLang = 'pt',
 }: SessionResultProps) {
-  const accuracy = Math.round((stats.correctAnswers / Math.max(1, stats.totalQuestions)) * 100);
+  const accuracy = Math.min(100, Math.max(0, Math.round((stats.correctAnswers / Math.max(1, stats.totalQuestions)) * 100)));
 
   useEffect(() => {
     // Play celebratory audio fanfare
